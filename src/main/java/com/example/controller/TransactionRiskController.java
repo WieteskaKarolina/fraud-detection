@@ -101,12 +101,23 @@ public class TransactionRiskController {
 
         try {
             BinResponse binResponse = binLookupService.lookupBin(binNumber)
-                    .orElseThrow(() -> new WebApplicationException("BIN details not found", Response.Status.NOT_FOUND));
+                    .orElseThrow(() -> {
+                        LOGGER.warn("BIN details not found for: " + binNumber);
+                        return new WebApplicationException(
+                                Response.status(Response.Status.NOT_FOUND)
+                                        .entity(Map.of("error", "BIN details not found", "bin", binNumber))
+                                        .build()
+                        );
+                    });
 
             return Response.ok(binResponse).build();
+        } catch (WebApplicationException e) {
+            return e.getResponse();
         } catch (Exception e) {
-            LOGGER.error("Error fetching BIN details: {}", e.getMessage(), e);
-            throw new WebApplicationException("Error fetching BIN details", Response.Status.INTERNAL_SERVER_ERROR);
+            LOGGER.error("Unexpected error while fetching BIN details for: " + binNumber, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Error fetching BIN details", "message", e.getMessage()))
+                    .build();
         }
     }
 }
