@@ -50,14 +50,11 @@ class TransactionRiskControllerTest {
 
     @Test
     void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() throws Exception {
-        // Given
         TransactionRequest request = new TransactionRequest("000000", 50.0, "LA");
         when(binLookupService.lookupBin("000000")).thenReturn(Optional.empty());
 
-        // When
         Response response = transactionRiskController.evaluateTransactionRisk(request, null, null);
 
-        // Then
         assertEquals(404, response.getStatus());
         Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
         assertEquals("BIN details not found", responseBody.get("error"));
