@@ -50,6 +50,38 @@ openssl genpkey -algorithm RSA -out src/main/resources/META-INF/resources/privat
 openssl rsa -pubout -in src/main/resources/META-INF/resources/privateKey.pem -out src/main/resources/META-INF/resources/publicKey.pem
 ```
 
+## API Endpoints
+The application exposes the following REST endpoints:
+
+### **Authentication API** (`/api/auth`)
+- **`POST /api/auth/generate`** - Generates a JWT token for a given username and role.
+  - **Query Parameters:**
+    - `username` (required) - The username for which the JWT will be generated.
+    - `role` (optional, default: `user`) - The role of the user (`user` or `admin`).
+  - **Response:**
+    - JSON containing the generated JWT token.
+
+### **Transaction Risk API** (`/api/transactions`)
+- **`POST /api/transactions/evaluate`** - Evaluates the fraud risk for a given transaction.
+  - **Request Body:**
+    - `bin` - The BIN number of the card.
+    - `amount` - The transaction amount.
+    - `location` - The location of the transaction.
+  - **Headers:**
+    - `X-Request-Id` (optional) - Custom trace ID.
+  - **Response:**
+    - JSON containing `riskScore` and `explanation`.
+  - **Authorization:**
+    - Requires JWT token with role `user` or `admin`.
+
+- **`GET /api/transactions/bin/{binNumber}`** - Retrieves BIN details for a given card BIN.
+  - **Path Parameters:**
+    - `binNumber` - A numeric BIN (6 to 11 digits).
+  - **Response:**
+    - JSON containing BIN details.
+  - **Authorization:**
+    - Requires JWT token with role `admin`.
+
 ## Build the Project
 Before running the Docker container, build the Quarkus project and run all tests using:
 
@@ -95,5 +127,7 @@ docker rmi quarkus-fraud-detection
 ---
 
 Now your Quarkus Fraud Detection Service is up and running inside Docker! 🚀
+
+
 
 
