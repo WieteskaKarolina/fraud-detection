@@ -89,6 +89,8 @@ COPY --chown=185 target/quarkus-app/app/ /deployments/app/
 COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
 COPY src/main/resources/my-project-key-sandbox.p12 /deployments/my-project-key-sandbox.p12
 COPY src/main/resources/application.properties /deployments/application.properties
+COPY src/main/resources/META-INF/resources/privateKey.pem /deployments/privateKey.pem
+COPY src/main/resources/META-INF/resources/publicKey.pem /deployments/publicKey.pem
 
 EXPOSE 8080
 USER 185
