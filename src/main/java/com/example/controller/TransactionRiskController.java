@@ -20,8 +20,15 @@ import java.util.Map;
 import java.util.UUID;
 
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 @ApplicationScoped
 @Path("/api/transactions")
+@Produces("application/json")
+@Consumes("application/json")
 public class TransactionRiskController {
 
     private static final Logger LOGGER = Logger.getLogger(TransactionRiskController.class);
@@ -35,16 +42,19 @@ public class TransactionRiskController {
     @Inject
     TransactionService transactionService;
 
+    @Inject
+    JsonWebToken jwt;
 
     @POST
     @Path("/evaluate")
     @Operation(summary = "Evaluate transaction risk", description = "Evaluates transaction risk based on given details")
-    @Consumes("application/json")
-    @Produces("application/json")
+    @RolesAllowed({"admin", "user"})
     public Response evaluateTransactionRisk(@Valid @RequestBody TransactionRequest transactionRequest,
-                                            @HeaderParam("X-Request-Id") String requestId) {
+                                            @HeaderParam("X-Request-Id") String requestId,
+                                            @Context SecurityContext securityContext) {
         String traceId = (requestId != null) ? requestId : UUID.randomUUID().toString();
-        LOGGER.info("Evaluating transaction risk with X-Request-Id: " + traceId);
+        String username = jwt.getName();
+        LOGGER.info("User " + username + " evaluating transaction risk with X-Request-Id: " + traceId);
 
         try {
             String bin = transactionRequest.getBin();
@@ -81,10 +91,9 @@ public class TransactionRiskController {
         }
     }
 
-
     @GET
     @Path("/bin/{binNumber}")
-    @Produces("application/json")
+    @RolesAllowed({"admin"})
     @Operation(summary = "Retrieve BIN details", description = "Fetches BIN details for the provided BIN number.")
     public Response getBinDetails(@PathParam("binNumber")
                                   @Pattern(regexp = "\\d{6,11}", message = "BIN must be 6 to 11 digits") String binNumber) {
