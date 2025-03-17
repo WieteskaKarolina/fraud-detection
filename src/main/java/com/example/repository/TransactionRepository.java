@@ -17,7 +17,6 @@ public class TransactionRepository implements PanacheRepository<Transaction> {
     }
 
     public Transaction findById(Long id) {
-        return findById(id);
+        return find("id", id).firstResult();
     }
-
 }

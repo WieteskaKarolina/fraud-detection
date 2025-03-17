@@ -1,15 +1,12 @@
 package com.example.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
-import jakarta.persistence.PrePersist;
 
 @Entity
+@Table(name = "transaction")
 public class Transaction extends PanacheEntityBase {
 
     @Id
