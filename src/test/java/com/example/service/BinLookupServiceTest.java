@@ -67,7 +67,6 @@ class BinLookupServiceTest {
 
         Optional<BinResponse> resultOpt = binLookupService.lookupBin("585240");
 
-        // Assert that the response is present (not empty)
         assertTrue(resultOpt.isPresent(), "BinResponse should be present");
 
         BinResponse result = resultOpt.get();
@@ -81,22 +80,21 @@ class BinLookupServiceTest {
     @Test
     void testLookupBinNoContent() throws Exception {
         Response mockResponse = mock(Response.class);
-        when(mockResponse.body()).thenReturn(null);  // Simulating an empty response
-        when(mockResponse.isSuccessful()).thenReturn(true); // Successful, but no content
+        when(mockResponse.body()).thenReturn(null);
+        when(mockResponse.isSuccessful()).thenReturn(true);
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
 
-        Optional<BinResponse> resultOpt = binLookupService.lookupBin("123456");  // Adjust to a BIN with no data
+        Optional<BinResponse> resultOpt = binLookupService.lookupBin("123456");
 
-        // Assert that the response is empty (204 No Content scenario)
         assertTrue(resultOpt.isEmpty(), "BinResponse should be empty when no content is returned");
     }
 
     @Test
     void testLookupBinFailure() throws Exception {
         Response mockResponse = mock(Response.class);
-        when(mockResponse.isSuccessful()).thenReturn(false);  // Simulating an unsuccessful response
+        when(mockResponse.isSuccessful()).thenReturn(false);
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);

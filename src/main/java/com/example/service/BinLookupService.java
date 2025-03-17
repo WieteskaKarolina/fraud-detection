@@ -93,23 +93,20 @@ public class BinLookupService {
                 throw new IOException("Request failed: " + response.code() + " - " + response.message());
             }
 
-            // If the response body is empty, return an empty Optional
             if (jsonResponse.isEmpty()) {
-                return Optional.empty();  // No content in the response
+                return Optional.empty();
             }
 
             try {
-                // Attempt to parse the response as a JSON array
                 JSONArray jsonArray = new JSONArray(jsonResponse);
                 if (jsonArray.length() > 0) {
                     return Optional.of(BinResponse.fromJson(jsonArray.getJSONObject(0)));
                 } else {
-                    return Optional.empty();  // No data found in the array
+                    return Optional.empty();
                 }
             } catch (JSONException e) {
-                // Catch JSON parsing errors and log the issue
                 System.err.println("Error parsing JSON response: " + e.getMessage());
-                return Optional.empty();  // Return empty if JSON is invalid
+                return Optional.empty();
             }
         }
     }

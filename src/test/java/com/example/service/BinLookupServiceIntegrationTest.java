@@ -20,27 +20,21 @@ public class BinLookupServiceIntegrationTest {
 
     @Test
     void testLookupBinWithConfig() throws UnrecoverableKeyException, CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
-        // Load the configuration from application.properties
         Config config = ConfigProvider.getConfig();
 
-        // Read configuration values
         String binApiUrl = config.getValue("mastercard.api.url", String.class);
         String consumerKey = config.getValue("mastercard.consumer.key", String.class);
         String keyPath = config.getValue("mastercard.private.key.path", String.class);
         String alias = config.getValue("mastercard.private.key.alias", String.class);
         String password = config.getValue("mastercard.private.key.password", String.class);
 
-        // Initialize BinLookupService with config values
         BinLookupService binLookupService = new BinLookupService(binApiUrl, consumerKey, keyPath, alias, password);
 
-        // BIN number to test
-        String bin = "585240";  // Adjust to test a valid BIN
+        String bin = "585240";
 
         try {
-            // Call the lookupBin() method
             Optional<BinResponse> resultOpt = binLookupService.lookupBin(bin);
 
-            // Check that the result is present and matches the expected values
             assertTrue(resultOpt.isPresent(), "BinResponse should be present");
             BinResponse result = resultOpt.get();
             assertEquals("585240", result.getBinNum());
@@ -56,27 +50,21 @@ public class BinLookupServiceIntegrationTest {
 
     @Test
     void testLookupBinWithNoContent() throws UnrecoverableKeyException, CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
-        // Load the configuration from application.properties
         Config config = ConfigProvider.getConfig();
 
-        // Read configuration values
         String binApiUrl = config.getValue("mastercard.api.url", String.class);
         String consumerKey = config.getValue("mastercard.consumer.key", String.class);
         String keyPath = config.getValue("mastercard.private.key.path", String.class);
         String alias = config.getValue("mastercard.private.key.alias", String.class);
         String password = config.getValue("mastercard.private.key.password", String.class);
 
-        // Initialize BinLookupService with config values
         BinLookupService binLookupService = new BinLookupService(binApiUrl, consumerKey, keyPath, alias, password);
 
-        // BIN number that will not return data (adjust this to test a BIN without a response)
-        String bin = "000000";  // Example of a BIN that does not exist or return any data
+        String bin = "000000";
 
         try {
-            // Call the lookupBin() method
             Optional<BinResponse> resultOpt = binLookupService.lookupBin(bin);
 
-            // Assert that the result is empty (204 No Content scenario)
             assertTrue(resultOpt.isEmpty(), "BinResponse should be empty for a BIN with no data");
         } catch (Exception e) {
             e.printStackTrace();
