@@ -17,6 +17,15 @@ public class TransactionRequest {
     @NotNull
     public String location;
 
+    public TransactionRequest(String bin, double amount, String location) {
+        this.bin = bin;
+        this.amount = amount;
+        this.location = location;
+    }
+
+    public TransactionRequest() {
+    }
+
     public String getBin() {
         return bin;
     }
@@ -27,5 +36,9 @@ public class TransactionRequest {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public void setBin(String bin) {
+        this.bin = bin;
     }
 }
