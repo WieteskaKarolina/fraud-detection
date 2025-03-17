@@ -6,6 +6,50 @@ Fraud Detection API integrated with Mastercard bin-lookup API
 - Java 17+ installed (for local builds)
 - Maven installed (for building the project)
 
+## Configuration
+To properly configure the application, ensure the following environment variables and properties are set:
+
+### **Mastercard API Configuration**
+```properties
+mastercard.api.url=https://sandbox.api.mastercard.com/bin-resources/bin-ranges/account-searches
+mastercard.consumer.key=<consumer-key>
+mastercard.private.key.path=<private-key-path>
+mastercard.private.key.alias=<private-key-alias>
+mastercard.private.key.password=<private-key-password>
+```
+
+### **Database Configuration**
+```properties
+quarkus.datasource.username=<your-db-username>
+quarkus.datasource.password=<your-db-password>
+quarkus.datasource.jdbc.url=<your-db-url>
+quarkus.hibernate-orm.database.generation=update
+quarkus.hibernate-orm.log.sql=true
+```
+
+### **Logging Configuration**
+```properties
+quarkus.log.category."io.quarkus.cache".level=DEBUG
+quarkus.log.category."com.example".level=DEBUG
+quarkus.cache.caffeine.binCache.expire-after-write=10m
+```
+
+### **JWT Authentication Configuration**
+```properties
+mp.jwt.verify.issuer=<your-issuer>
+smallrye.jwt.sign.key.location=src/main/resources/META-INF/resources/privateKey.pem
+mp.jwt.verify.publickey.location=src/main/resources/META-INF/resources/publicKey.pem
+smallrye.jwt.sign.algorithm=RS256
+```
+
+## Generate RSA Keys for JWT Authentication
+To generate the necessary RSA keys for JWT authentication, run the following commands:
+
+```sh
+openssl genpkey -algorithm RSA -out src/main/resources/META-INF/resources/privateKey.pem
+openssl rsa -pubout -in src/main/resources/META-INF/resources/privateKey.pem -out src/main/resources/META-INF/resources/publicKey.pem
+```
+
 ## Build the Project
 Before running the Docker container, build the Quarkus project and run all tests using:
 
