@@ -2,37 +2,43 @@ package com.example.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transaction")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Transaction extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Column(nullable = false)
-    public String bin;
+    private String bin;
 
     @Column(nullable = false)
-    public double amount;
+    private double amount;
 
     @Column(nullable = false)
-    public String location;
+    private String location;
 
     @Column(nullable = false)
-    public int riskScore;
+    private int riskScore;
 
     @Column(nullable = false)
-    public String riskReason;
+    private String riskReason;
 
     @Column(nullable = false, unique = true)
-    public String requestId;
+    private String requestId;
 
     @Column(nullable = false)
-    public LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 
     @PrePersist
     public void setTimestamp() {

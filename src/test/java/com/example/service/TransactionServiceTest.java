@@ -27,11 +27,11 @@ class TransactionServiceTest {
         Transaction result = transactionService.saveTransaction(requestId, bin, amount, location, riskScore, riskReason);
 
         assertNotNull(result);
-        assertEquals(requestId, result.requestId);
-        assertEquals(bin, result.bin);
-        assertEquals(amount, result.amount, 0.01);
-        assertEquals(location, result.location);
-        assertEquals(riskScore, result.riskScore);
-        assertEquals(riskReason, result.riskReason);
+        assertEquals(requestId, result.getRequestId());
+        assertEquals(bin, result.getBin());
+        assertEquals(amount, result.getAmount(), 0.01);
+        assertEquals(location, result.getLocation());
+        assertEquals(riskScore, result.getRiskScore());
+        assertEquals(riskReason, result.getRiskReason());
     }
 }

@@ -77,8 +77,8 @@ public class TransactionRiskController {
 
             return Response.ok(Map.of(
                     "requestId", traceId,
-                    "riskScore", transaction.riskScore,
-                    "explanation", transaction.riskReason
+                    "riskScore", transaction.getRiskScore(),
+                    "explanation", transaction.getRiskReason()
             )).header("X-Request-Id", traceId).build();
 
         } catch (WebApplicationException e) {
