@@ -50,37 +50,40 @@ openssl genpkey -algorithm RSA -out src/main/resources/META-INF/resources/privat
 openssl rsa -pubout -in src/main/resources/META-INF/resources/privateKey.pem -out src/main/resources/META-INF/resources/publicKey.pem
 ```
 
-## API Endpoints
-The application exposes the following REST endpoints:
+## 🚀 OpenAPI Documentation
+This project uses **OpenAPI 3.0** for API documentation.
 
-### **Authentication API** (`/api/auth`)
-- **`POST /api/auth/generate`** - Generates a JWT token for a given username and role.
-  - **Query Parameters:**
-    - `username` (required) - The username for which the JWT will be generated.
-    - `role` (optional, default: `user`) - The role of the user (`user` or `admin`).
-  - **Response:**
-    - JSON containing the generated JWT token.
+### 👉 How to View the API Docs?
+You can load the OpenAPI spec (`openapi.yaml`) in an online editor:
 
-### **Transaction Risk API** (`/api/transactions`)
-- **`POST /api/transactions/evaluate`** - Evaluates the fraud risk for a given transaction.
-  - **Request Body:**
-    - `bin` - The BIN number of the card.
-    - `amount` - The transaction amount.
-    - `location` - The location of the transaction.
-  - **Headers:**
-    - `X-Request-Id` (optional) - Custom trace ID.
-  - **Response:**
-    - JSON containing `riskScore` and `explanation`.
-  - **Authorization:**
-    - Requires JWT token with role `user` or `admin`.
+### 1️⃣ **Option 1: Swagger Editor (Online)**
+- Open [Swagger Editor](https://editor.swagger.io/)
+- Click **File → Import URL**
+- Enter the raw GitHub link to `openapi.yaml`, e.g.:
+  ```
+  https://raw.githubusercontent.com/user/repo/main/openapi.yaml
+  ```
+- Now you can **view and test the API!**
 
-- **`GET /api/transactions/bin/{binNumber}`** - Retrieves BIN details for a given card BIN.
-  - **Path Parameters:**
-    - `binNumber` - A numeric BIN (6 to 11 digits).
-  - **Response:**
-    - JSON containing BIN details.
-  - **Authorization:**
-    - Requires JWT token with role `admin`.
+### 2️⃣ **Option 2: Run Swagger UI Locally**
+- Clone this repository:
+  ```sh
+  git clone https://github.com/user/repo.git
+  cd repo
+  ```
+- Start the Quarkus server:
+  ```sh
+  ./mvnw quarkus:dev
+  ```
+- Open Swagger UI in your browser:
+  ```sh
+  http://localhost:8080/q/swagger-ui
+  ```
+
+### 🔒 **Authentication**
+Some endpoints require authentication (`BearerAuth`).
+- Generate a **JWT token** and use it in Swagger UI (`Authorize` button).
+
 
 ## Build the Project
 Before running the Docker container, build the Quarkus project and run all tests using:
