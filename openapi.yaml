@@ -1,0 +1,230 @@
+---
+openapi: 3.0.3
+info:
+  title: fraud-detection API
+  version: 1.0.0-SNAPSHOT
+paths:
+  /api/auth/generate:
+    post:
+      tags:
+      - JWT Controller
+      summary: Generate JWT token
+      description: Generates a JWT token for authentication based on a given username
+        and role.
+      operationId: generateToken
+      parameters:
+      - name: role
+        in: query
+        description: User role (either 'user' or 'admin')
+        required: false
+        schema:
+          default: user
+          pattern: user|admin
+          type: string
+        example: admin
+      - name: username
+        in: query
+        description: Username for whom the JWT token is generated
+        required: true
+        schema:
+          pattern: \S
+          type: string
+        example: john_doe
+      responses:
+        "200":
+          description: JWT generated successfully
+        "400":
+          description: Invalid input parameters
+        "500":
+          description: Internal server error while generating JWT
+  /api/bin/{binNumber}:
+    get:
+      tags:
+      - Bin Lookup Controller
+      summary: Retrieve BIN details
+      description: Fetches BIN details for the provided BIN number. Requires 'admin'
+        role.
+      operationId: getBinDetails
+      parameters:
+      - name: binNumber
+        in: path
+        required: true
+        schema:
+          pattern: "\\d{6,11}"
+          type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BinResponse'
+        "400":
+          description: Invalid BIN format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+  /api/transactions/evaluate:
+    post:
+      tags:
+      - Transaction Risk Controller
+      summary: Evaluate transaction risk
+      description: Evaluates the risk associated with a transaction based on provided
+        details. Requires authentication.
+      operationId: evaluateTransactionRisk
+      parameters:
+      - name: X-Request-Id
+        in: header
+        schema:
+          description: Unique request identifier for tracing
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+      requestBody:
+        description: Transaction request payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+        required: true
+      responses:
+        "200":
+          description: Risk evaluation successful
+        "400":
+          description: Invalid request format
+        "401":
+          description: Unauthorized request
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+components:
+  schemas:
+    BinRequest:
+      description: Request DTO for BIN lookup
+      required:
+      - accountRange
+      type: object
+      properties:
+        accountRange:
+          description: The first 6-9 digits of the card number
+          type: string
+          example: "585240"
+    BinResponse:
+      description: Response DTO for BIN lookup
+      type: object
+      properties:
+        binNum:
+          description: The BIN number (first 6-9 digits of the card number)
+          type: string
+          example: "585240"
+        binLength:
+          format: int32
+          description: Length of the BIN number
+          type: integer
+          example: 6
+        acceptanceBrand:
+          description: "The card brand (e.g., Visa, MasterCard, etc.)"
+          type: string
+          example: MasterCard
+        ica:
+          description: Interchange Company Account (ICA) number
+          type: string
+          example: "123456"
+        customerName:
+          description: The name of the customer associated with the BIN
+          type: string
+          example: Bank of Example
+        smartDataEnabled:
+          description: Indicates if Smart Data is enabled
+          type: boolean
+          example: true
+        anonymousPrepaidIndicator:
+          description: Indicates if the card is an anonymous prepaid card
+          type: string
+          example: "Yes"
+        consumerType:
+          description: "Type of consumer associated with the BIN (e.g., Personal,\
+            \ Business)"
+          type: string
+          example: Personal
+        localUse:
+          description: Indicates if the card is restricted to local use
+          type: boolean
+          example: false
+        nonReloadableIndicator:
+          description: Indicates if the card is non-reloadable
+          type: boolean
+          example: false
+        authorizationOnly:
+          description: "Indicates if the card can only be used for authorization,\
+            \ not transactions"
+          type: boolean
+          example: false
+        gamblingBlockEnabled:
+          description: Indicates if gambling transactions are blocked
+          type: boolean
+          example: false
+        fundingSource:
+          description: "The funding source type (e.g., Credit, Debit, Prepaid)"
+          type: string
+          example: Credit
+        country:
+          description: Country information related to the BIN
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Country'
+    Country:
+      description: Country details for the BIN response
+      type: object
+      properties:
+        code:
+          format: int32
+          description: Numeric country code (ISO 3166-1 numeric)
+          type: integer
+          example: 840
+        alpha3:
+          description: Alpha-3 country code (ISO 3166-1 alpha-3)
+          type: string
+          example: USA
+        name:
+          description: Full country name
+          type: string
+          example: United States
+    TransactionRequest:
+      description: Request DTO for processing a transaction
+      required:
+      - bin
+      - location
+      type: object
+      properties:
+        bin:
+          description: "Bank Identification Number (BIN), first 6-11 digits of the\
+            \ card number"
+          maxLength: 11
+          minLength: 6
+          pattern: \d+
+          type: string
+          example: "585240"
+        amount:
+          format: double
+          description: Transaction amount
+          minimum: 0
+          type: number
+          example: 100.5
+        location:
+          description: Location where the transaction is being processed
+          type: string
+          example: "New York, USA"
+  securitySchemes:
+    SecurityScheme:
+      type: http
+      description: Authentication
+      scheme: bearer
+      bearerFormat: JWT
