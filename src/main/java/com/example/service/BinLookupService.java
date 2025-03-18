@@ -15,7 +15,7 @@ import java.util.Optional;
 @ApplicationScoped
 public class BinLookupService {
 
-    private static final Logger LOGGER = Logger.getLogger(BinService.class);
+    private static final Logger LOGGER = Logger.getLogger(BinLookupService.class);
 
     private final BinLookupRestClient binLookupRestClient;
 

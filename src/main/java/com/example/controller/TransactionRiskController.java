@@ -69,8 +69,8 @@ public class TransactionRiskController {
             Transaction transaction = transactionService.saveTransaction(
                     traceId,
                     bin,
-                    transactionRequest.amount,
-                    transactionRequest.location,
+                    transactionRequest.getAmount(),
+                    transactionRequest.getLocation(),
                     evaluation.getRiskScore(),
                     evaluation.getDescription()
             );

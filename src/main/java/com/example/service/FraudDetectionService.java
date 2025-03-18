@@ -95,7 +95,7 @@ public class FraudDetectionService {
     }
 
     private RiskEvaluation evaluateGamblingBlock(BinResponse binData) {
-        if (binData.isGamblingBlockEnabled()) {
+        if (Boolean.TRUE.equals(binData.getGamblingBlockEnabled())) {
             return new RiskEvaluation(60, "Gambling block enabled");
         }
         return RiskEvaluation.NO_RISK;
@@ -109,14 +109,14 @@ public class FraudDetectionService {
     }
 
     private RiskEvaluation evaluateHighTransactionAmount(TransactionRequest transactionRequest) {
-        if (transactionRequest.amount > 1000) {
+        if (transactionRequest.getAmount() > 1000) {
             return new RiskEvaluation(20, "High transaction amount detected");
         }
         return RiskEvaluation.NO_RISK;
     }
 
     private RiskEvaluation evaluateHighRiskLocation(TransactionRequest transactionRequest) {
-        if ("HighRiskCity".equalsIgnoreCase(transactionRequest.location)) {
+        if ("HighRiskCity".equalsIgnoreCase(transactionRequest.getLocation())) {
             return new RiskEvaluation(30, "High-risk location detected");
         }
         return RiskEvaluation.NO_RISK;
