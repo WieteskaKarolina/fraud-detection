@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.example</groupId>
   <artifactId>fraud-detection</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+
   <properties>
-    <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-    <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+
     <quarkus.platform.version>3.2.12.Final</quarkus.platform.version>
-    <skipITs>true</skipITs>
+    <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+
+    <compiler-plugin.version>3.11.0</compiler-plugin.version>
+    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <okhttp-version>3.14.9</okhttp-version>
     <gson-version>2.8.1</gson-version>
     <gson-fire-version>1.8.0</gson-fire-version>
+    <junit.version>5.9.3</junit.version>
+    <mockito.version>5.7.0</mockito.version>
+    <json.version>20210307</json.version>
+    <oauth1-signer.version>1.5.3</oauth1-signer.version>
+    <client-encryption.version>1.6.0</client-encryption.version>
+    <lombok.version>1.18.30</lombok.version>
   </properties>
 
   <dependencyManagement>
@@ -31,7 +41,6 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- Quarkus Dependencies -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-cache</artifactId>
@@ -42,20 +51,19 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-reactive</artifactId>
+      <artifactId>quarkus-resteasy</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm-panache</artifactId>
     </dependency>
-
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-reactive-jsonb</artifactId>
+      <artifactId>quarkus-resteasy-jsonb</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -79,15 +87,25 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-jwt</artifactId>
     </dependency>
-
-    <!-- OkHttp3 -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-oidc-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-oidc-client-filter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <version>${okhttp-version}</version>
     </dependency>
-
-    <!-- Gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -98,21 +116,18 @@
       <artifactId>gson-fire</artifactId>
       <version>${gson-fire-version}</version>
     </dependency>
-
-    <!-- Testing Dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.9.3</version>  <!-- Zaktualizowana wersja -->
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.9.3</version>  <!-- Zaktualizowana wersja -->
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
@@ -126,32 +141,29 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.7.0</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.7.0</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20210307</version>
+      <version>${json.version}</version>
     </dependency>
-
-    <!-- MasterCard Libraries -->
     <dependency>
       <groupId>com.mastercard.developer</groupId>
       <artifactId>oauth1-signer</artifactId>
-      <version>1.5.3</version>
+      <version>${oauth1-signer.version}</version>
     </dependency>
     <dependency>
       <groupId>com.mastercard.developer</groupId>
       <artifactId>client-encryption</artifactId>
-      <version>1.6.0</version>
+      <version>${client-encryption.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains</groupId>
@@ -177,26 +189,19 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>${compiler-plugin.version}</version>
         <configuration>
           <source>17</source>
           <target>17</target>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M5</version>
-        <configuration>
-          <dependenciesToScan>
-            <dependency>org.junit.jupiter:junit-jupiter-api</dependency>
-          </dependenciesToScan>
-        </configuration>
+        <version>${surefire-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
