@@ -13,7 +13,6 @@ public class FraudDetectionServiceTest {
     private BinResponse binResponse;
     private TransactionRequest transactionRequest;
 
-    // Constants for country codes
     private static final int RUSSIA_COUNTRY_CODE = 643;
     private static final int POLAND_COUNTRY_CODE = 616;
     private static final int NIGERIA_COUNTRY_CODE = 566;
@@ -24,8 +23,6 @@ public class FraudDetectionServiceTest {
         fraudDetectionService = new FraudDetectionService();
         binResponse = new BinResponse();
         transactionRequest = new TransactionRequest();
-        BinResponse.Country country = new BinResponse.Country();
-        binResponse.setCountry(country);
     }
 
     @Test

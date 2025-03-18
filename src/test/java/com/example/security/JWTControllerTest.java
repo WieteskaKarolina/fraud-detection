@@ -47,9 +47,8 @@ class JWTControllerTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(ContentType.JSON)
-                .body("title", equalTo("Constraint Violation"))
-                .body("violations[0].field", equalTo("generateToken.arg0"))
-                .body("violations[0].message", equalTo("Username is required"));
+                .body("parameterViolations[0].message", equalTo("Username is required"))
+                .body("parameterViolations[0].value", equalTo(""));
     }
 
     @Test
@@ -62,8 +61,8 @@ class JWTControllerTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(ContentType.JSON)
-                .body("title", equalTo("Constraint Violation"))
-                .body("violations[0].message", containsString("Invalid role. Allowed roles: user, admin"));
+                .body("parameterViolations[0].message", containsString("Invalid role. Allowed roles: user, admin"))
+                .body("parameterViolations[0].value", equalTo("hacker"));
     }
 
     @Test
