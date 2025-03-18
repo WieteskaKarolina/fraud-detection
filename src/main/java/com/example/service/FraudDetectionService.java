@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.dto.TransactionRequest;
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.*;
 

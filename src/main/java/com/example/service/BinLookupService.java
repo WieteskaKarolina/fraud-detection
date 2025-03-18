@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.client.BinLookupRestClient;
 import com.example.dto.BinRequest;
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

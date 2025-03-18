@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import com.example.dto.TransactionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

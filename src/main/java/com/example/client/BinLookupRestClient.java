@@ -1,7 +1,7 @@
 package com.example.client;
 
 import com.example.dto.BinRequest;
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

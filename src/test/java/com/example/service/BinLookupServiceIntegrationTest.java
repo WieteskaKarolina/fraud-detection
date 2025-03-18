@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;

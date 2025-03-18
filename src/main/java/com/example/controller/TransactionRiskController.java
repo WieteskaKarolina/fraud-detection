@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.TransactionRequest;
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
 import com.example.service.FraudDetectionService;

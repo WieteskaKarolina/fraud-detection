@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.client.BinLookupRestClient;
-import com.example.model.BinResponse;
+import com.example.dto.BinResponse;
 import io.quarkus.test.junit.QuarkusTest;;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
