@@ -67,8 +67,6 @@ paths:
           description: Forbidden
         "500":
           description: Internal server error
-      security:
-      - BearerAuth: []
   /api/transactions/evaluate:
     post:
       tags:
@@ -102,8 +100,6 @@ paths:
           description: Forbidden
         "500":
           description: Internal server error
-      security:
-      - BearerAuth: []
 components:
   schemas:
     BinRequest:
