@@ -9,6 +9,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,10 +30,35 @@ public class JWTController {
 
     @POST
     @Path("/generate")
-    public Response generateToken(@QueryParam("username") @NotBlank(message = "Username is required") String username,
-                                  @QueryParam("role") @DefaultValue("user")
-                                  @Pattern(regexp = "user|admin", message = "Invalid role. Allowed roles: user, admin") String role) {
+    @Operation(
+            summary = "Generate JWT token",
+            description = "Generates a JWT token for authentication based on a given username and role."
+    )
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "JWT generated successfully"),
+            @APIResponse(responseCode = "400", description = "Invalid input parameters"),
+            @APIResponse(responseCode = "500", description = "Internal server error while generating JWT")
+    })
+    public Response generateToken(
+            @QueryParam("username")
+            @NotBlank(message = "Username is required")
+            @Parameter(
+                    description = "Username for whom the JWT token is generated",
+                    required = true,
+                    example = "john_doe"
+            )
+                    String username,
 
+            @QueryParam("role")
+            @DefaultValue("user")
+            @Pattern(regexp = "user|admin", message = "Invalid role. Allowed roles: user, admin")
+            @Parameter(
+                    description = "User role (either 'user' or 'admin')",
+                    required = false,
+                    example = "admin"
+            )
+                    String role
+    ) {
         try {
             if (username == null || username.trim().isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
