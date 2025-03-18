@@ -7,8 +7,7 @@ import java.util.*;
 
 @ApplicationScoped
 public class FraudDetectionService {
-    // Contains high risk countries: Russia, Nigeria, Venezuela
-    private static final Set<Integer> HIGH_RISK_COUNTRIES = new HashSet<>(Arrays.asList(643, 566, 862));
+    private static final Set<Integer> HIGH_RISK_COUNTRIES = Set.of(643, 566, 862);
 
     private final List<Rule<BinResponse>> binResponseRules = new ArrayList<>();
     private final List<Rule<TransactionRequest>> transactionRequestRules = new ArrayList<>();
