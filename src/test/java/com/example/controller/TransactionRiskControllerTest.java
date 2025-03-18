@@ -1,10 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.TransactionRequest;
-import com.example.dto.BinResponse;
-import com.example.service.BinLookupService;
-import com.example.service.FraudDetectionService;
-import com.example.service.TransactionService;
+import com.example.facade.TransactionFacade;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
@@ -17,9 +14,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,13 +25,7 @@ class TransactionRiskControllerTest {
     TransactionRiskController transactionRiskController;
 
     @Mock
-    FraudDetectionService fraudDetectionService;
-
-    @Mock
-    BinLookupService binLookupService;
-
-    @Mock
-    TransactionService transactionService;
+    TransactionFacade transactionFacade;
 
     @Mock
     JsonWebToken jwt;
@@ -49,9 +39,11 @@ class TransactionRiskControllerTest {
     }
 
     @Test
-    void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() throws Exception {
+    void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {
         TransactionRequest request = new TransactionRequest("000000", 50.0, "LA");
-        when(binLookupService.lookupBin("000000")).thenReturn(Optional.empty());
+        when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
+                Response.status(404).entity(Map.of("error", "BIN details not found")).build()
+        );
 
         Response response = transactionRiskController.evaluateTransactionRisk(request, null, null);
 
@@ -61,37 +53,16 @@ class TransactionRiskControllerTest {
     }
 
     @Test
-    void evaluateTransactionRisk_shouldHandleInternalServerError() throws Exception {
+    void evaluateTransactionRisk_shouldHandleInternalServerError() {
         TransactionRequest request = new TransactionRequest("123456", 100.0, "NY");
-        when(binLookupService.lookupBin("123456")).thenThrow(new RuntimeException("Unexpected error"));
+        when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
+                Response.status(500).entity(Map.of("error", "Error evaluating transaction risk")).build()
+        );
 
         Response response = transactionRiskController.evaluateTransactionRisk(request, null, null);
 
         assertEquals(500, response.getStatus());
         Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
         assertEquals("Error evaluating transaction risk", responseBody.get("error"));
-    }
-
-    @Test
-    void getBinDetails_shouldReturnBinDetails_whenBinExists() throws Exception {
-        BinResponse mockBinResponse = new BinResponse();
-        when(binLookupService.lookupBin("123456")).thenReturn(Optional.of(mockBinResponse));
-
-        Response response = transactionRiskController.getBinDetails("123456");
-
-        assertEquals(200, response.getStatus());
-        assertNotNull(response.getEntity());
-    }
-
-
-    @Test
-    void getBinDetails_shouldReturnNotFound_whenBinNotExists() throws Exception {
-        when(binLookupService.lookupBin("999999")).thenReturn(Optional.empty());
-
-        Response response = transactionRiskController.getBinDetails("999999");
-
-        assertEquals(404, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("BIN details not found", responseBody.get("error"));
     }
 }

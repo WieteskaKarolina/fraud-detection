@@ -10,33 +10,40 @@ import static org.hamcrest.Matchers.*;
 
 @Disabled
 @QuarkusTest
-public class TransactionRiskControllerIT {
+public class BinLookupControllerIT {
 
     private final String VALID_TOKEN = "Bearer <valid-jwt-token>";
 
     @Test
-    void testEvaluateTransactionRisk_Success() {
+    void testGetBinDetails_Success() {
         given()
                 .header("Authorization", VALID_TOKEN)
-                .contentType(ContentType.JSON)
-                .body("{\"bin\": \"585240\", \"amount\": 100.0, \"location\": \"New York\"}")
                 .when()
-                .post("/api/transactions/evaluate")
+                .get("/api/bin/585240")
                 .then()
                 .statusCode(200)
-                .body("riskScore", notNullValue());
+                .body("consumerType", notNullValue());
     }
 
     @Test
-    void testEvaluateTransactionRisk_Unauthorized() {
+    void testGetBinDetails_Unauthorized() {
         given()
                 .header("Authorization", "Bearer invalid-token")
-                .header("X-Request-Id", "req-123")
-                .contentType(ContentType.JSON)
-                .body("{\"bin\": \"123456\", \"amount\": 100.0, \"location\": \"New York\"}")
                 .when()
-                .post("/api/transactions/evaluate")
+                .get("/api/bin/585240")
                 .then()
                 .statusCode(401);
     }
+
+    @Test
+    void testGetBinDetails_NotFound() {
+        given()
+                .header("Authorization", VALID_TOKEN)
+                .when()
+                .get("/api/bin/999999")
+                .then()
+                .statusCode(404)
+                .body("error", equalTo("BIN details not found"));
+    }
 }
+
