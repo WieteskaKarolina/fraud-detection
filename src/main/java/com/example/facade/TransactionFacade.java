@@ -42,7 +42,10 @@ public class TransactionFacade {
                 .orElseThrow(() -> new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
                         "BIN details not found", transactionRequest.getBin()));
 
-        FraudDetectionService.RiskEvaluation evaluation = fraudDetectionService.evaluateRisk(binResponse, transactionRequest);
+        FraudDetectionService.RiskEvaluation evaluation = fraudDetectionService.evaluateRisk(
+                binResponse,
+                transactionRequest
+        );
 
         Transaction transaction = transactionService.saveTransaction(
                 traceId,

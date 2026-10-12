@@ -3,11 +3,9 @@ package com.example.client;
 import com.example.dto.BinRequest;
 import com.example.dto.BinResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -25,11 +23,6 @@ class BinLookupRestClientTest {
 
     private final BinRequest mockRequest = new BinRequest("585240");
     private final BinResponse mockResponse = new BinResponse();
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void lookupBin_ShouldReturnBinResponseList() {

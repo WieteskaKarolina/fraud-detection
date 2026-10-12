@@ -1,20 +1,24 @@
 package com.example.controller;
 
+import com.example.dto.BinResponse;
 import com.example.facade.BinLookupFacade;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.Pattern;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import com.example.dto.BinResponse;
 
 @ApplicationScoped
 @Path("/api/bin")
@@ -32,7 +36,6 @@ public class BinLookupController {
 
     @GET
     @Path("/{binNumber}")
-    @SecurityRequirement(name = "BearerAuth")
     @RolesAllowed({"admin"})
     @Operation(summary = "Retrieve BIN details",
             description = "Fetches BIN details for the provided BIN number. Requires 'admin' role.")
@@ -48,8 +51,10 @@ public class BinLookupController {
             @APIResponse(responseCode = "504", description = "BIN provider timeout"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Response getBinDetails(@PathParam("binNumber")
-                                  @Pattern(regexp = "\\d{6,11}", message = "BIN must be 6 to 11 digits") String binNumber) {
+    public Response getBinDetails(
+            @PathParam("binNumber")
+            @Pattern(regexp = "\\d{6,11}", message = "BIN must be 6 to 11 digits") String binNumber
+    ) {
         return binLookupFacade.getBinDetails(binNumber);
     }
 }

@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.model.Transaction;
 import com.example.repository.TransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ public class TransactionService {
 
     private final TransactionRepository repository;
 
+    @Inject
     public TransactionService(TransactionRepository repository) {
         this.repository = repository;
     }
@@ -32,7 +34,6 @@ public class TransactionService {
         transaction.setLocation(location);
         transaction.setRiskScore(riskScore);
         transaction.setRiskReason(riskReason);
-        repository.persist(transaction);
-        return transaction;
+        return repository.saveTransaction(transaction);
     }
 }

@@ -14,7 +14,15 @@ public class ApiException extends RuntimeException {
         this.bin = bin;
     }
 
-    public Response.Status getStatus() { return status; }
-    public String getCode() { return code; }
-    public String getBin() { return bin; }
+    public Response.Status getStatus() {
+        return status;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getBin() {
+        return bin;
+    }
 }

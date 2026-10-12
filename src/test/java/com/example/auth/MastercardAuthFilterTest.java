@@ -9,7 +9,9 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
@@ -36,8 +38,6 @@ class MastercardAuthFilterTest {
 
     @BeforeEach
     void setup() throws Exception {
-        MockitoAnnotations.openMocks(this);
-
         try (MockedStatic<AuthenticationUtils> mockedAuthUtils = mockStatic(AuthenticationUtils.class)) {
             mockedAuthUtils.when(() -> AuthenticationUtils.loadSigningKey(anyString(), anyString(), anyString()))
                     .thenReturn(mockPrivateKey);

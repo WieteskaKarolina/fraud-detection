@@ -1,8 +1,10 @@
 package com.example.service;
 
 import com.example.model.Transaction;
+import com.example.repository.TransactionRepository;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +18,12 @@ class TransactionServiceTest {
     @Inject
     TransactionService transactionService;
 
+    @Inject
+    TransactionRepository transactionRepository;
+
+    @Inject
+    EntityManager entityManager;
+
     @Test
     @Transactional
     void testSaveTransaction() {
@@ -26,14 +34,32 @@ class TransactionServiceTest {
         int riskScore = 75;
         String riskReason = "Suspicious activity";
 
-        Transaction result = transactionService.saveTransaction(requestId, bin, amount, location, riskScore, riskReason);
+        Transaction result = transactionService.saveTransaction(
+                requestId,
+                bin,
+                amount,
+                location,
+                riskScore,
+                riskReason
+        );
 
         assertNotNull(result);
-        assertEquals(requestId, result.getRequestId());
-        assertEquals(bin, result.getBin());
-        assertEquals(0, amount.compareTo(result.getAmount()));
-        assertEquals(location, result.getLocation());
-        assertEquals(riskScore, result.getRiskScore());
-        assertEquals(riskReason, result.getRiskReason());
+        assertNotNull(result.getId(), "The persisted transaction should have an ID");
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Transaction persisted = transactionRepository.findById(result.getId());
+
+        assertNotNull(persisted, "The transaction should be persisted in the database");
+        assertAll(
+                () -> assertEquals(requestId, persisted.getRequestId()),
+                () -> assertEquals(bin, persisted.getBin()),
+                () -> assertEquals(0, amount.compareTo(persisted.getAmount())),
+                () -> assertEquals(location, persisted.getLocation()),
+                () -> assertEquals(riskScore, persisted.getRiskScore()),
+                () -> assertEquals(riskReason, persisted.getRiskReason()),
+                () -> assertNotNull(persisted.getTimestamp())
+        );
     }
 }

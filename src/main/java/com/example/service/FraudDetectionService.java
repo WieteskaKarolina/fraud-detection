@@ -1,10 +1,13 @@
 package com.example.service;
 
-import com.example.dto.TransactionRequest;
 import com.example.dto.BinResponse;
+import com.example.dto.TransactionRequest;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @ApplicationScoped
 public class FraudDetectionService {

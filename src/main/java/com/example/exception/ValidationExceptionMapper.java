@@ -1,6 +1,7 @@
 package com.example.exception;
 
 import com.example.dto.ApiErrorResponse;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -14,7 +15,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViol
     @Override
     public Response toResponse(ConstraintViolationException exception) {
         List<String> errors = exception.getConstraintViolations().stream()
-                .map(violation -> violation.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .distinct()
                 .sorted()
                 .toList();

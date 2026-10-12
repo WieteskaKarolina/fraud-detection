@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
-
 @ApplicationScoped
 public class BinLookupFacade {
 

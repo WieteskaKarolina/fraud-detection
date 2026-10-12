@@ -1,5 +1,6 @@
 package com.example.client;
 
+import com.example.auth.MastercardAuthFilter;
 import com.example.dto.BinRequest;
 import com.example.dto.BinResponse;
 import jakarta.ws.rs.Consumes;
@@ -9,7 +10,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
-import com.example.auth.MastercardAuthFilter;
 
 import java.util.List;
 
