@@ -20,14 +20,19 @@ public class TransactionFacade {
 
     private static final Logger LOGGER = Logger.getLogger(TransactionFacade.class);
 
-    @Inject
-    FraudDetectionService fraudDetectionService;
+    private final FraudDetectionService fraudDetectionService;
+    private final BinLookupService binLookupService;
+    private final TransactionService transactionService;
 
     @Inject
-    BinLookupService binLookupService;
-
-    @Inject
-    TransactionService transactionService;
+    public TransactionFacade(
+            FraudDetectionService fraudDetectionService,
+            BinLookupService binLookupService,
+            TransactionService transactionService) {
+        this.fraudDetectionService = fraudDetectionService;
+        this.binLookupService = binLookupService;
+        this.transactionService = transactionService;
+    }
 
     public Response evaluateTransaction(TransactionRequest transactionRequest, String requestId, String username) {
         String traceId = (requestId != null) ? requestId : UUID.randomUUID().toString();

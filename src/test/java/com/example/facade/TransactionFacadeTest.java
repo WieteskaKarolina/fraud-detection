@@ -8,19 +8,17 @@ import com.example.service.BinLookupService;
 import com.example.service.FraudDetectionService;
 import com.example.service.TransactionService;
 import jakarta.ws.rs.core.Response;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,17 +38,12 @@ class TransactionFacadeTest {
     @Mock
     private TransactionService transactionService;
 
-    @Mock
-    private Logger logger;
-
     private TransactionRequest transactionRequest;
     private String requestId;
     private String username;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         transactionRequest = new TransactionRequest("585240", new BigDecimal("100.00"), "New York");
         requestId = UUID.randomUUID().toString();
         username = "testUser";
