@@ -40,6 +40,7 @@ public class BinLookupController {
             @APIResponse(responseCode = "403", description = "Forbidden"),
             @APIResponse(responseCode = "502", description = "BIN provider integration error"),
             @APIResponse(responseCode = "503", description = "BIN provider unavailable"),
+            @APIResponse(responseCode = "504", description = "BIN provider timeout"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     public Response getBinDetails(@PathParam("binNumber")

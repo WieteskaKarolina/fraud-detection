@@ -47,6 +47,7 @@ public class TransactionRiskController {
             @APIResponse(responseCode = "404", description = "BIN not found"),
             @APIResponse(responseCode = "502", description = "BIN provider integration error"),
             @APIResponse(responseCode = "503", description = "BIN provider unavailable"),
+            @APIResponse(responseCode = "504", description = "BIN provider timeout"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     @RolesAllowed({"admin", "user"})

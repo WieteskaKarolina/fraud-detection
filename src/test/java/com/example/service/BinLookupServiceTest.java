@@ -4,6 +4,7 @@ import com.example.client.BinLookupRestClient;
 import com.example.dto.BinRequest;
 import com.example.dto.BinResponse;
 import com.example.exception.ApiException;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -61,20 +62,29 @@ class BinLookupServiceTest {
     }
 
     @Test
-    void treatsProvider404AsBinNotFound() {
+    void mapsProvider404ToIntegrationError() {
         mockHttpError(404);
 
-        assertTrue(binLookupService.lookupBin(TEST_BIN).isEmpty());
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> binLookupService.lookupBin(TEST_BIN)
+        );
+
+        assertAll(
+                () -> assertEquals("MASTERCARD_INTEGRATION_ERROR", exception.getCode()),
+                () -> assertEquals(502, exception.getStatus().getStatusCode()),
+                () -> assertEquals(TEST_BIN, exception.getBin())
+        );
     }
 
     @ParameterizedTest
     @CsvSource({
             "400, MASTERCARD_INTEGRATION_ERROR, 502",
             "401, MASTERCARD_AUTHENTICATION_FAILED, 502",
-            "403, MASTERCARD_AUTHENTICATION_FAILED, 502",
+            "403, MASTERCARD_PERMISSION_DENIED, 502",
             "429, MASTERCARD_UNAVAILABLE, 503",
             "500, MASTERCARD_UNAVAILABLE, 503",
-            "503, MASTERCARD_UNAVAILABLE, 503"
+            "503, MASTERCARD_INTEGRATION_ERROR, 502"
     })
     void mapsProviderHttpErrors(int providerStatus, String expectedCode, int expectedStatus) {
         mockHttpError(providerStatus);
@@ -92,9 +102,9 @@ class BinLookupServiceTest {
     }
 
     @Test
-    void mapsTimeoutToServiceUnavailable() {
+    void mapsTimeoutToGatewayTimeout() {
         when(binLookupRestClient.lookupBin(any()))
-                .thenThrow(new RuntimeException(
+                .thenThrow(new ProcessingException(
                         "Client call failed",
                         new SocketTimeoutException("Timed out")
                 ));
@@ -106,7 +116,7 @@ class BinLookupServiceTest {
 
         assertAll(
                 () -> assertEquals("MASTERCARD_TIMEOUT", exception.getCode()),
-                () -> assertEquals(503, exception.getStatus().getStatusCode()),
+                () -> assertEquals(504, exception.getStatus().getStatusCode()),
                 () -> assertEquals(TEST_BIN, exception.getBin())
         );
     }
