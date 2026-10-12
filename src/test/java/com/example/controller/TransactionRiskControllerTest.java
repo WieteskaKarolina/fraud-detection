@@ -4,13 +4,10 @@ import com.example.dto.TransactionRequest;
 import com.example.facade.TransactionFacade;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jboss.logging.Logger;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -30,14 +27,6 @@ class TransactionRiskControllerTest {
 
     @Mock
     JsonWebToken jwt;
-
-    @Mock
-    Logger logger;
-
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {

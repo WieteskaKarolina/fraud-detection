@@ -23,8 +23,12 @@ import com.example.dto.BinResponse;
 @SecurityRequirement(name = "BearerAuth")
 public class BinLookupController {
 
+    private final BinLookupFacade binLookupFacade;
+
     @Inject
-    BinLookupFacade binLookupFacade;
+    public BinLookupController(BinLookupFacade binLookupFacade) {
+        this.binLookupFacade = binLookupFacade;
+    }
 
     @GET
     @Path("/{binNumber}")

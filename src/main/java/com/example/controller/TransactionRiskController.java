@@ -35,11 +35,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @SecurityRequirement(name = "BearerAuth")
 public class TransactionRiskController {
 
-    @Inject
-    TransactionFacade transactionFacade;
+    private final TransactionFacade transactionFacade;
+    private final JsonWebToken jwt;
 
     @Inject
-    JsonWebToken jwt;
+    public TransactionRiskController(TransactionFacade transactionFacade, JsonWebToken jwt) {
+        this.transactionFacade = transactionFacade;
+        this.jwt = jwt;
+    }
 
     @POST
     @Path("/evaluate")

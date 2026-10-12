@@ -25,9 +25,12 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 public class JWTController {
 
+    private final String issuer;
+
     @Inject
-    @ConfigProperty(name = "mp.jwt.verify.issuer")
-    String issuer;
+    public JWTController(@ConfigProperty(name = "mp.jwt.verify.issuer") String issuer) {
+        this.issuer = issuer;
+    }
 
     @POST
     @Path("/generate")
