@@ -1,6 +1,7 @@
 package com.example.facade;
 
 import com.example.dto.BinResponse;
+import com.example.exception.ApiException;
 import com.example.service.BinLookupService;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
@@ -12,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,12 +56,12 @@ class BinLookupFacadeTest {
     void getBinDetails_ShouldReturnNotFound_WhenBinNotExists() {
         when(binLookupService.lookupBin(invalidBin)).thenReturn(Optional.empty());
 
-        Response response = binLookupFacade.getBinDetails(invalidBin);
+        ApiException exception = assertThrows(ApiException.class,
+                () -> binLookupFacade.getBinDetails(invalidBin));
 
-        assertEquals(404, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("BIN details not found", responseBody.get("error"));
-        assertEquals(invalidBin, responseBody.get("bin"));
+        assertEquals(404, exception.getStatus().getStatusCode());
+        assertEquals("BIN_NOT_FOUND", exception.getCode());
+        assertEquals(invalidBin, exception.getBin());
 
         verify(binLookupService).lookupBin(invalidBin);
     }
@@ -70,12 +70,9 @@ class BinLookupFacadeTest {
     void getBinDetails_ShouldReturnInternalServerError_OnException() {
         when(binLookupService.lookupBin(validBin)).thenThrow(new RuntimeException("Unexpected error"));
 
-        Response response = binLookupFacade.getBinDetails(validBin);
-
-        assertEquals(500, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("Error fetching BIN details", responseBody.get("error"));
-        assertEquals("Unexpected error", responseBody.get("message"));
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> binLookupFacade.getBinDetails(validBin));
+        assertEquals("Unexpected error", exception.getMessage());
 
         verify(binLookupService).lookupBin(validBin);
     }

@@ -2,11 +2,11 @@ package com.example.facade;
 
 import com.example.dto.BinResponse;
 import com.example.dto.TransactionRequest;
+import com.example.exception.ApiException;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
 import com.example.service.FraudDetectionService;
 import com.example.service.TransactionService;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,11 +85,12 @@ class TransactionFacadeTest {
     void evaluateTransaction_ShouldReturnNotFound_WhenBinNotFound() {
         when(binLookupService.lookupBin(transactionRequest.getBin())).thenReturn(Optional.empty());
 
-        Response response = transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
+        ApiException exception = assertThrows(ApiException.class,
+                () -> transactionFacade.evaluateTransaction(transactionRequest, requestId, username));
 
-        assertEquals(404, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("BIN details not found", responseBody.get("error"));
+        assertEquals(404, exception.getStatus().getStatusCode());
+        assertEquals("BIN_NOT_FOUND", exception.getCode());
+        assertEquals(transactionRequest.getBin(), exception.getBin());
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verifyNoInteractions(fraudDetectionService, transactionService);
@@ -99,11 +100,9 @@ class TransactionFacadeTest {
     void evaluateTransaction_ShouldReturnInternalServerError_OnException() {
         when(binLookupService.lookupBin(transactionRequest.getBin())).thenThrow(new RuntimeException("Unexpected error"));
 
-        Response response = transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
-
-        assertEquals(500, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("Error evaluating transaction risk", responseBody.get("error"));
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> transactionFacade.evaluateTransaction(transactionRequest, requestId, username));
+        assertEquals("Unexpected error", exception.getMessage());
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verifyNoInteractions(fraudDetectionService, transactionService);

@@ -47,8 +47,8 @@ class JWTControllerTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(ContentType.JSON)
-                .body("parameterViolations[0].message", equalTo("Username is required"))
-                .body("parameterViolations[0].value", equalTo(""));
+                .body("code", equalTo("INVALID_REQUEST"))
+                .body("message", equalTo("Username is required"));
     }
 
     @Test
@@ -61,8 +61,8 @@ class JWTControllerTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(ContentType.JSON)
-                .body("parameterViolations[0].message", containsString("Invalid role. Allowed roles: user, admin"))
-                .body("parameterViolations[0].value", equalTo("hacker"));
+                .body("code", equalTo("INVALID_REQUEST"))
+                .body("message", containsString("Invalid role. Allowed roles: user, admin"));
     }
 
     @Test
