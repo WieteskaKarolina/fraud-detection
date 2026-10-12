@@ -44,6 +44,9 @@ public class TransactionRiskController {
             @APIResponse(responseCode = "400", description = "Invalid request format"),
             @APIResponse(responseCode = "401", description = "Unauthorized request"),
             @APIResponse(responseCode = "403", description = "Forbidden"),
+            @APIResponse(responseCode = "404", description = "BIN not found"),
+            @APIResponse(responseCode = "502", description = "BIN provider integration error"),
+            @APIResponse(responseCode = "503", description = "BIN provider unavailable"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     @RolesAllowed({"admin", "user"})

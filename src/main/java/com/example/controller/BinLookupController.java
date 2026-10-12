@@ -35,8 +35,11 @@ public class BinLookupController {
             @APIResponse(responseCode = "200", description = "Successful response",
                     content = @Content(schema = @Schema(implementation = BinResponse.class))),
             @APIResponse(responseCode = "400", description = "Invalid BIN format"),
+            @APIResponse(responseCode = "404", description = "BIN not found"),
             @APIResponse(responseCode = "401", description = "Unauthorized"),
             @APIResponse(responseCode = "403", description = "Forbidden"),
+            @APIResponse(responseCode = "502", description = "BIN provider integration error"),
+            @APIResponse(responseCode = "503", description = "BIN provider unavailable"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     public Response getBinDetails(@PathParam("binNumber")
