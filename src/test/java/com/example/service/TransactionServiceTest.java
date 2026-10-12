@@ -6,6 +6,8 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -19,7 +21,7 @@ class TransactionServiceTest {
     void testSaveTransaction() {
         String requestId = "req-123";
         String bin = "123456";
-        double amount = 100.50;
+        BigDecimal amount = new BigDecimal("100.50");
         String location = "New York";
         int riskScore = 75;
         String riskReason = "Suspicious activity";
@@ -29,7 +31,7 @@ class TransactionServiceTest {
         assertNotNull(result);
         assertEquals(requestId, result.getRequestId());
         assertEquals(bin, result.getBin());
-        assertEquals(amount, result.getAmount(), 0.01);
+        assertEquals(0, amount.compareTo(result.getAmount()));
         assertEquals(location, result.getLocation());
         assertEquals(riskScore, result.getRiskScore());
         assertEquals(riskReason, result.getRiskReason());

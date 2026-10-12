@@ -28,6 +28,7 @@ public class BinLookupController {
 
     @GET
     @Path("/{binNumber}")
+    @SecurityRequirement(name = "BearerAuth")
     @RolesAllowed({"admin"})
     @Operation(summary = "Retrieve BIN details",
             description = "Fetches BIN details for the provided BIN number. Requires 'admin' role.")

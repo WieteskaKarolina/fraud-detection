@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -50,7 +51,7 @@ class TransactionFacadeTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        transactionRequest = new TransactionRequest("585240", 100.0, "New York");
+        transactionRequest = new TransactionRequest("585240", new BigDecimal("100.00"), "New York");
         requestId = UUID.randomUUID().toString();
         username = "testUser";
     }
@@ -66,7 +67,7 @@ class TransactionFacadeTest {
         Transaction mockTransaction = new Transaction();
         mockTransaction.setRiskScore(50);
         mockTransaction.setRiskReason("Test Risk");
-        when(transactionService.saveTransaction(any(), any(), anyDouble(), any(), anyInt(), any()))
+        when(transactionService.saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any()))
                 .thenReturn(mockTransaction);
 
         Response response = transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
@@ -78,7 +79,7 @@ class TransactionFacadeTest {
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verify(fraudDetectionService).evaluateRisk(binResponse, transactionRequest);
-        verify(transactionService).saveTransaction(any(), any(), anyDouble(), any(), anyInt(), any());
+        verify(transactionService).saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any());
     }
 
     @Test

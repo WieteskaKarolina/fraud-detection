@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dto.TransactionRequest;
 import com.example.dto.BinResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.math.BigDecimal;
 import java.util.*;
 
 @ApplicationScoped
@@ -108,7 +109,7 @@ public class FraudDetectionService {
     }
 
     private RiskEvaluation evaluateHighTransactionAmount(TransactionRequest transactionRequest) {
-        if (transactionRequest.getAmount() > 1000) {
+        if (transactionRequest.getAmount().compareTo(BigDecimal.valueOf(1000)) > 0) {
             return new RiskEvaluation(20, "High transaction amount detected");
         }
         return RiskEvaluation.NO_RISK;

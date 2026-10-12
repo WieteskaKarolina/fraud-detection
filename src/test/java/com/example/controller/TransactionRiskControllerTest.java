@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +41,7 @@ class TransactionRiskControllerTest {
 
     @Test
     void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {
-        TransactionRequest request = new TransactionRequest("000000", 50.0, "LA");
+        TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA");
         when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
                 Response.status(404).entity(Map.of("error", "BIN details not found")).build()
         );
@@ -54,7 +55,7 @@ class TransactionRiskControllerTest {
 
     @Test
     void evaluateTransactionRisk_shouldHandleInternalServerError() {
-        TransactionRequest request = new TransactionRequest("123456", 100.0, "NY");
+        TransactionRequest request = new TransactionRequest("123456", new BigDecimal("100.00"), "NY");
         when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
                 Response.status(500).entity(Map.of("error", "Error evaluating transaction risk")).build()
         );

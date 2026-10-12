@@ -17,6 +17,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
+import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -24,6 +26,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Path("/api/transactions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@SecurityScheme(
+        securitySchemeName = "BearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 @SecurityRequirement(name = "BearerAuth")
 public class TransactionRiskController {
 
@@ -35,6 +43,7 @@ public class TransactionRiskController {
 
     @POST
     @Path("/evaluate")
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(
             summary = "Evaluate transaction risk",
             description = "Evaluates the risk associated with a transaction based on provided details. Requires authentication."
