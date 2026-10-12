@@ -4,13 +4,10 @@ import com.example.dto.BinResponse;
 import com.example.exception.ApiException;
 import com.example.service.BinLookupService;
 import jakarta.ws.rs.core.Response;
-import org.jboss.logging.Logger;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -27,16 +24,8 @@ class BinLookupFacadeTest {
     @Mock
     private BinLookupService binLookupService;
 
-    @Mock
-    private Logger logger;
-
     private final String validBin = "585240";
     private final String invalidBin = "999999";
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void getBinDetails_ShouldReturnSuccessResponse_WhenBinExists() {

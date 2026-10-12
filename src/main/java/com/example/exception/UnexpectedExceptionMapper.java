@@ -14,7 +14,13 @@ public class UnexpectedExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         LOGGER.error("Unhandled API exception", exception);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON)
-                .entity(new ApiErrorResponse("INTERNAL_ERROR", "An unexpected error occurred", null)).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(new ApiErrorResponse(
+                        "INTERNAL_ERROR",
+                        "An unexpected error occurred",
+                        null
+                ))
+                .build();
     }
 }

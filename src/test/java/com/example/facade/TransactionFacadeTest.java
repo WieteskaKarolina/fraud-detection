@@ -8,15 +8,14 @@ import com.example.service.BinLookupService;
 import com.example.service.FraudDetectionService;
 import com.example.service.TransactionService;
 import jakarta.ws.rs.core.Response;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,18 +38,13 @@ class TransactionFacadeTest {
     @Mock
     private TransactionService transactionService;
 
-    @Mock
-    private Logger logger;
-
     private TransactionRequest transactionRequest;
     private String requestId;
     private String username;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        transactionRequest = new TransactionRequest("585240", 100.0, "New York");
+        transactionRequest = new TransactionRequest("585240", new BigDecimal("100.00"), "New York");
         requestId = UUID.randomUUID().toString();
         username = "testUser";
     }
@@ -66,7 +60,7 @@ class TransactionFacadeTest {
         Transaction mockTransaction = new Transaction();
         mockTransaction.setRiskScore(50);
         mockTransaction.setRiskReason("Test Risk");
-        when(transactionService.saveTransaction(any(), any(), anyDouble(), any(), anyInt(), any()))
+        when(transactionService.saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any()))
                 .thenReturn(mockTransaction);
 
         Response response = transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
@@ -78,7 +72,7 @@ class TransactionFacadeTest {
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verify(fraudDetectionService).evaluateRisk(binResponse, transactionRequest);
-        verify(transactionService).saveTransaction(any(), any(), anyDouble(), any(), anyInt(), any());
+        verify(transactionService).saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any());
     }
 
     @Test

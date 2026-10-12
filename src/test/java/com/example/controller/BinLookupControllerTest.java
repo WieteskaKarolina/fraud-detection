@@ -2,13 +2,10 @@ package com.example.controller;
 
 import com.example.facade.BinLookupFacade;
 import jakarta.ws.rs.core.Response;
-import org.jboss.logging.Logger;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
@@ -25,14 +22,6 @@ class BinLookupControllerTest {
 
     @Mock
     BinLookupFacade binLookupFacade;
-
-    @Mock
-    Logger logger;
-
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void getBinDetails_shouldReturnBinDetails_whenBinExists() {

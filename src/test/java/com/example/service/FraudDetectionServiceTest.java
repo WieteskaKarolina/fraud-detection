@@ -5,6 +5,8 @@ import com.example.dto.TransactionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FraudDetectionServiceTest {
@@ -23,6 +25,7 @@ public class FraudDetectionServiceTest {
         fraudDetectionService = new FraudDetectionService();
         binResponse = new BinResponse();
         transactionRequest = new TransactionRequest();
+        transactionRequest.setAmount(BigDecimal.ZERO);
     }
 
     @Test
@@ -30,7 +33,7 @@ public class FraudDetectionServiceTest {
         binResponse.getCountry().setCode(RUSSIA_COUNTRY_CODE);
         binResponse.setAnonymousPrepaidIndicator("Y");
         binResponse.setConsumerType("CORPORATE");
-        transactionRequest.setAmount(2000);
+        transactionRequest.setAmount(new BigDecimal("2000.00"));
         transactionRequest.setLocation("HighRiskCity");
 
         FraudDetectionService.RiskEvaluation evaluation = fraudDetectionService.evaluateRisk(binResponse, transactionRequest);

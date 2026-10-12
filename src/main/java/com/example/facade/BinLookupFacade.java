@@ -8,14 +8,17 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
-
 @ApplicationScoped
 public class BinLookupFacade {
 
     private static final Logger LOGGER = Logger.getLogger(BinLookupFacade.class);
 
+    private final BinLookupService binLookupService;
+
     @Inject
-    BinLookupService binLookupService;
+    public BinLookupFacade(BinLookupService binLookupService) {
+        this.binLookupService = binLookupService;
+    }
 
     public Response getBinDetails(String binNumber) {
         LOGGER.info("Fetching BIN details for: " + binNumber);

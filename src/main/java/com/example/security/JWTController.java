@@ -6,7 +6,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -25,9 +29,12 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 public class JWTController {
 
+    private final String issuer;
+
     @Inject
-    @ConfigProperty(name = "mp.jwt.verify.issuer")
-    String issuer;
+    public JWTController(@ConfigProperty(name = "mp.jwt.verify.issuer") String issuer) {
+        this.issuer = issuer;
+    }
 
     @POST
     @Path("/generate")
