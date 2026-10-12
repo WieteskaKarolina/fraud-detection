@@ -7,17 +7,21 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
+import java.util.List;
+
 @Provider
 public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
     @Override
     public Response toResponse(ConstraintViolationException exception) {
-        String message = exception.getConstraintViolations().stream()
+        List<String> errors = exception.getConstraintViolations().stream()
                 .map(violation -> violation.getMessage())
-                .findFirst()
-                .orElse("Request validation failed");
+                .distinct()
+                .sorted()
+                .toList();
+        String message = errors.isEmpty() ? "Request validation failed" : errors.get(0);
         return Response.status(Response.Status.BAD_REQUEST)
                 .type(MediaType.APPLICATION_JSON)
-                .entity(new ApiErrorResponse("INVALID_REQUEST", message, null))
+                .entity(new ApiErrorResponse("INVALID_REQUEST", message, null, errors))
                 .build();
     }
 }
