@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.client.BinLookupRestClient;
 import com.example.dto.BinResponse;
+import com.example.exception.ApiException;
 import io.quarkus.test.junit.QuarkusTest;;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,9 +63,9 @@ class BinLookupServiceTest {
     void testLookupBinFailure() {
         when(binLookupRestClient.lookupBin(any())).thenThrow(new RuntimeException("API error"));
 
-        Optional<BinResponse> resultOpt = binLookupService.lookupBin(TEST_BIN);
-
-        assertTrue(resultOpt.isEmpty(), "BinResponse should be empty in case of API failure");
+        ApiException exception = assertThrows(ApiException.class, () -> binLookupService.lookupBin(TEST_BIN));
+        assertEquals("MASTERCARD_INTEGRATION_ERROR", exception.getCode());
+        assertEquals(502, exception.getStatus().getStatusCode());
     }
 
     private static BinResponse createMockBinResponse() {
