@@ -52,9 +52,29 @@ paths:
         schema:
           pattern: "\\d{6,11}"
           type: string
+      - name: X-Correlation-Id
+        in: header
+        required: false
+        description: Optional client identifier for correlating this request with client logs
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: '[A-Za-z0-9._:-]{1,128}'
+        example: client-order-123
       responses:
         "200":
           description: Successful response
+          headers:
+            X-Request-Id:
+              description: Server-generated identifier for tracing this request
+              schema:
+                type: string
+                format: uuid
+            X-Correlation-Id:
+              description: Echo of the supplied X-Correlation-Id, when provided
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -65,6 +85,14 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+        "404":
+          description: BIN not found
+        "502":
+          description: BIN provider integration error
+        "503":
+          description: BIN provider unavailable
+        "504":
+          description: BIN provider timeout
         "500":
           description: Internal server error
   /api/transactions/evaluate:
@@ -73,15 +101,20 @@ paths:
       - Transaction Risk Controller
       summary: Evaluate transaction risk
       description: Evaluates the risk associated with a transaction based on provided
-        details. Requires authentication.
+        details. The API generates an X-Request-Id and accepts an optional X-Correlation-Id.
+        Requires authentication.
       operationId: evaluateTransactionRisk
       parameters:
-      - name: X-Request-Id
+      - name: X-Correlation-Id
         in: header
+        required: false
+        description: Optional client identifier for correlating this request with client logs
         schema:
-          description: Unique request identifier for tracing
           type: string
-          example: 123e4567-e89b-12d3-a456-426614174000
+          minLength: 1
+          maxLength: 128
+          pattern: '[A-Za-z0-9._:-]{1,128}'
+        example: client-order-123
       requestBody:
         description: Transaction request payload
         content:
@@ -92,12 +125,30 @@ paths:
       responses:
         "200":
           description: Risk evaluation successful
+          headers:
+            X-Request-Id:
+              description: Server-generated identifier for tracing this request
+              schema:
+                type: string
+                format: uuid
+            X-Correlation-Id:
+              description: Echo of the supplied X-Correlation-Id, when provided
+              schema:
+                type: string
         "400":
           description: Invalid request format
         "401":
           description: Unauthorized request
         "403":
           description: Forbidden
+        "404":
+          description: BIN not found
+        "502":
+          description: BIN provider integration error
+        "503":
+          description: BIN provider unavailable
+        "504":
+          description: BIN provider timeout
         "500":
           description: Internal server error
 components:
@@ -197,7 +248,9 @@ components:
       description: Request DTO for processing a transaction
       required:
       - bin
+      - amount
       - location
+      - countryCode
       type: object
       properties:
         bin:
@@ -209,15 +262,22 @@ components:
           type: string
           example: "585240"
         amount:
-          format: double
           description: Transaction amount
           minimum: 0
           type: number
-          example: 100.5
+          multipleOf: 0.01
+          example: 100.50
         location:
           description: Location where the transaction is being processed
           type: string
           example: "New York, USA"
+        countryCode:
+          description: ISO 3166-1 alpha-3 country code for the transaction location
+          minLength: 3
+          maxLength: 3
+          pattern: '[A-Za-z]{3}'
+          type: string
+          example: USA
   securitySchemes:
     SecurityScheme:
       type: http
