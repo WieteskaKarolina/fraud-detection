@@ -39,6 +39,9 @@ public class Transaction extends PanacheEntityBase {
     @Column(nullable = false)
     private String location;
 
+    @Column(length = 3)
+    private String countryCode;
+
     @Column(nullable = false)
     private int riskScore;
 

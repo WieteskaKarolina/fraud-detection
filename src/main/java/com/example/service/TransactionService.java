@@ -24,6 +24,7 @@ public class TransactionService {
             String bin,
             BigDecimal amount,
             String location,
+            String countryCode,
             int riskScore,
             String riskReason) {
 
@@ -32,6 +33,7 @@ public class TransactionService {
         transaction.setBin(bin);
         transaction.setAmount(amount);
         transaction.setLocation(location);
+        transaction.setCountryCode(countryCode);
         transaction.setRiskScore(riskScore);
         transaction.setRiskReason(riskReason);
         return repository.saveTransaction(transaction);
