@@ -1,0 +1,13 @@
+services:
+  fraud-detection:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    image: quarkus-fraud-detection
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS_APPEND: >-
+        -Dmastercard.private.key.path=/deployments/my-project-key-sandbox.p12
+        -Dsmallrye.jwt.sign.key.location=/deployments/privateKey.pem
+        -Dmp.jwt.verify.publickey.location=/deployments/publicKey.pem
