@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +34,7 @@ class TransactionRepositoryTest {
         Transaction transaction = new Transaction();
         transaction.setRequestId(UUID.randomUUID().toString());
         transaction.setBin("123456");
-        transaction.setAmount(100.50);
+        transaction.setAmount(new BigDecimal("100.50"));
         transaction.setLocation("New York");
         transaction.setRiskScore(75);
         transaction.setRiskReason("Suspicious activity");
@@ -51,7 +52,7 @@ class TransactionRepositoryTest {
         Transaction transaction = new Transaction();
         transaction.setRequestId("req-456");
         transaction.setBin("654321");
-        transaction.setAmount(200.75);
+        transaction.setAmount(new BigDecimal("200.75"));
         transaction.setLocation("Los Angeles");
         transaction.setRiskScore(50);
         transaction.setRiskReason("Low fraud risk");
@@ -71,7 +72,7 @@ class TransactionRepositoryTest {
         Transaction transaction = new Transaction();
         transaction.setRequestId(UUID.randomUUID().toString());
         transaction.setBin("987654");
-        transaction.setAmount(300.00);
+        transaction.setAmount(new BigDecimal("300.00"));
         transaction.setLocation("Chicago");
         transaction.setRiskScore(30);
         transaction.setRiskReason("Moderate fraud risk");

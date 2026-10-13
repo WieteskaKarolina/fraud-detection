@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dto.BinResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
+@Disabled("Requires access to the live Mastercard sandbox; provider error mapping is covered by unit tests")
 public class BinLookupServiceIntegrationTest {
 
     @Inject

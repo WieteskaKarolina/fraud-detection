@@ -1,69 +1,77 @@
 package com.example.facade;
 
 import com.example.dto.BinResponse;
+import com.example.dto.RiskAssessment;
 import com.example.dto.TransactionRequest;
+import com.example.exception.ApiException;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
-import com.example.service.FraudDetectionService;
+import com.example.service.TransactionRiskEvaluator;
 import com.example.service.TransactionService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.util.Map;
-import java.util.UUID;
 
 @ApplicationScoped
 public class TransactionFacade {
 
     private static final Logger LOGGER = Logger.getLogger(TransactionFacade.class);
 
-    @Inject
-    FraudDetectionService fraudDetectionService;
+    private final TransactionRiskEvaluator transactionRiskEvaluator;
+    private final BinLookupService binLookupService;
+    private final TransactionService transactionService;
 
     @Inject
-    BinLookupService binLookupService;
+    public TransactionFacade(
+            TransactionRiskEvaluator transactionRiskEvaluator,
+            BinLookupService binLookupService,
+            TransactionService transactionService) {
+        this.transactionRiskEvaluator = transactionRiskEvaluator;
+        this.binLookupService = binLookupService;
+        this.transactionService = transactionService;
+    }
 
-    @Inject
-    TransactionService transactionService;
+    public Response evaluateTransaction(
+            TransactionRequest transactionRequest,
+            String requestId,
+            String correlationId,
+            String username
+    ) {
+        LOGGER.infof("User %s evaluating transaction risk", username);
 
-    public Response evaluateTransaction(TransactionRequest transactionRequest, String requestId, String username) {
-        String traceId = (requestId != null) ? requestId : UUID.randomUUID().toString();
-        LOGGER.info("User " + username + " evaluating transaction risk with X-Request-Id: " + traceId);
+        BinResponse binResponse = binLookupService.lookupBin(transactionRequest.getBin())
+                .orElseThrow(() -> new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
+                        "BIN details not found", transactionRequest.getBin()));
 
-        try {
-            BinResponse binResponse = binLookupService.lookupBin(transactionRequest.getBin())
-                    .orElseThrow(() -> new WebApplicationException(
-                            Response.status(Response.Status.NOT_FOUND)
-                                    .entity(Map.of("error", "BIN details not found"))
-                                    .build()));
+        RiskAssessment assessment = transactionRiskEvaluator.evaluate(
+                binResponse,
+                transactionRequest
+        );
 
-            FraudDetectionService.RiskEvaluation evaluation = fraudDetectionService.evaluateRisk(binResponse, transactionRequest);
+        Transaction transaction = transactionService.saveTransaction(
+                requestId,
+                transactionRequest.getBin(),
+                transactionRequest.getAmount(),
+                transactionRequest.getLocation(),
+                transactionRequest.getCountryCode(),
+                assessment.riskScore(),
+                assessment.explanation()
+        );
 
-            Transaction transaction = transactionService.saveTransaction(
-                    traceId,
-                    transactionRequest.getBin(),
-                    transactionRequest.getAmount(),
-                    transactionRequest.getLocation(),
-                    evaluation.getRiskScore(),
-                    evaluation.getDescription()
-            );
-
-            return Response.ok(Map.of(
-                    "requestId", traceId,
-                    "riskScore", transaction.getRiskScore(),
-                    "explanation", transaction.getRiskReason()
-            )).header("X-Request-Id", traceId).build();
-
-        } catch (WebApplicationException e) {
-            return e.getResponse();
-        } catch (Exception e) {
-            LOGGER.error("Error evaluating transaction risk", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("error", "Error evaluating transaction risk"))
-                    .build();
-        }
+        return Response.ok(Map.of(
+                "requestId", requestId,
+                "riskScore", transaction.getRiskScore(),
+                "explanation", transaction.getRiskReason(),
+                "riskFactors", assessment.factors().stream()
+                        .map(factor -> Map.of(
+                                "code", factor.code(),
+                                "points", factor.points(),
+                                "description", factor.description()
+                        ))
+                        .toList()
+        )).build();
     }
 }
