@@ -4,7 +4,7 @@ Fraud Detection API integrated with Mastercard bin-lookup API
 ## Prerequisites
 - Docker installed on your machine
 - Java 17+ installed (for local builds)
-- Maven installed (for building the project)
+- Maven is not required; use the included Maven Wrapper (`mvnw` / `mvnw.cmd`)
 
 ## Configuration
 To properly configure the application, ensure the following environment variables and properties are set:
@@ -66,30 +66,29 @@ You can load the OpenAPI spec (`openapi.yaml`) in an online editor:
 - Now you can **view and test the API!**
 
 ### 2️⃣ **Option 2: Run Swagger UI Locally**
-- Clone this repository:
-  ```sh
-  git clone https://github.com/user/repo.git
-  cd repo
-  ```
 - Start the Quarkus server:
   ```sh
+  # Windows PowerShell
+  .\mvnw.cmd quarkus:dev
+
+  # Linux/macOS
   ./mvnw quarkus:dev
   ```
 - Open Swagger UI in your browser:
   ```sh
-  http://localhost:8080/q/swagger-ui
+  http://localhost:8080/swagger-ui
   ```
 
 ### 🔒 **Authentication**
 Some endpoints require authentication (`BearerAuth`).
-- Generate a **JWT token** and use it in Swagger UI (`Authorize` button).
+- Use a valid JWT in Swagger UI (`Authorize` button). The `/api/auth/generate` helper is available only in a test-profile build and is not included in the normal Docker image.
 
 
 ## Build the Project
-Before running the Docker container, build the Quarkus project and run all tests using:
+Before building the Docker image, package the Quarkus application (this also runs the tests):
 
-```sh
-mvn clean package
+```powershell
+.\mvnw.cmd clean package
 ```
 
 ## Build the Docker Image
@@ -100,14 +99,27 @@ docker build -f src/main/docker/Dockerfile.jvm -t quarkus-fraud-detection .
 ```
 
 ## Run the Docker Container
-To run the service inside a Docker container, use:
+To run the service directly, use:
 
-```sh
-docker run -p 8080:8080 \
-  -e "JAVA_OPTS=-Dmastercard.private.key.path=/deployments/my-project-key-sandbox.p12 \
-  -Dsmallrye.jwt.sign.key.location=/deployments/privateKey.pem \
-  -Dmp.jwt.verify.publickey.location=/deployments/publicKey.pem" \
+```powershell
+docker run --rm -p 8080:8080 `
+  -e "JAVA_OPTS_APPEND=-Dmastercard.private.key.path=/deployments/my-project-key-sandbox.p12 -Dsmallrye.jwt.sign.key.location=/deployments/privateKey.pem -Dmp.jwt.verify.publickey.location=/deployments/publicKey.pem" `
   quarkus-fraud-detection
+```
+
+The Dockerfile currently copies the configured key files into the image. Keep this image local; do not publish it to a registry.
+
+## Run with Docker Compose
+After packaging the application, start it with:
+
+```powershell
+docker compose up --build
+```
+
+Stop it with:
+
+```powershell
+docker compose down
 ```
 
 ## Stopping the Container
