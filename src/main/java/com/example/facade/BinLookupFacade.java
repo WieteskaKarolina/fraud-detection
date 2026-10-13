@@ -20,15 +20,14 @@ public class BinLookupFacade {
         this.binLookupService = binLookupService;
     }
 
-    public Response getBinDetails(String binNumber, String requestId, String correlationId) {
+    public BinResponse getBinDetails(String binNumber, String requestId, String correlationId) {
         LOGGER.infof("Fetching BIN details for %s", binNumber);
 
-        BinResponse binResponse = binLookupService.lookupBin(binNumber)
+        return binLookupService.lookupBin(binNumber)
                 .orElseThrow(() -> {
                     LOGGER.warnf("BIN details not found for %s", binNumber);
                     return new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
                             "BIN details not found", binNumber);
                 });
-        return Response.ok(binResponse).build();
     }
 }

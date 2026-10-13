@@ -1,5 +1,7 @@
 package com.example.controller;
 
+import com.example.dto.BinResponse;
+import com.example.exception.ApiException;
 import com.example.facade.BinLookupFacade;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -8,10 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,30 +22,36 @@ class BinLookupControllerTest {
     @Mock
     BinLookupFacade binLookupFacade;
 
+    @Mock
+    BinResponse binResponse;
+
     @Test
     void getBinDetails_shouldReturnBinDetails_whenBinExists() {
-        when(binLookupFacade.getBinDetails("123456", "test-request-id", "client-correlation")).thenReturn(
-                Response.ok(Map.of("bin", "123456", "status", "valid")).build()
-        );
+        // Mockujemy zwrócenie obiektu BinResponse zamiast Response
+        when(binLookupFacade.getBinDetails("123456", "test-request-id", "client-correlation"))
+                .thenReturn(binResponse);
 
         Response response = binLookupController.getBinDetails("123456", "test-request-id", "client-correlation");
 
         assertEquals(200, response.getStatus());
-        assertNotNull(response.getEntity());
+        assertEquals(binResponse, response.getEntity());
         verify(binLookupFacade).getBinDetails("123456", "test-request-id", "client-correlation");
     }
 
     @Test
-    void getBinDetails_shouldReturnNotFound_whenBinNotExists() {
-        when(binLookupFacade.getBinDetails("999999", "test-request-id", "client-correlation")).thenReturn(
-                Response.status(404).entity(Map.of("error", "BIN details not found")).build()
+    void getBinDetails_shouldThrowApiException_whenBinNotExists() {
+        // Fasada rzuca teraz ApiException, gdy BIN nie zostanie znaleziony
+        when(binLookupFacade.getBinDetails("999999", "test-request-id", "client-correlation"))
+                .thenThrow(new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND", "BIN details not found", "999999"));
+
+        // Oczekujemy wyjątku ApiException w teście jednostkowym kontrolera
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> binLookupController.getBinDetails("999999", "test-request-id", "client-correlation")
         );
 
-        Response response = binLookupController.getBinDetails("999999", "test-request-id", "client-correlation");
-
-        assertEquals(404, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals("BIN details not found", responseBody.get("error"));
+        assertEquals(Response.Status.NOT_FOUND, exception.getStatus());
+        assertEquals("BIN_NOT_FOUND", exception.getCode());
         verify(binLookupFacade).getBinDetails("999999", "test-request-id", "client-correlation");
     }
 }
