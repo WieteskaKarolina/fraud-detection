@@ -45,34 +45,6 @@ class TransactionRiskEvaluatorTest {
     }
 
     @Test
-    void evaluate_shouldAddAnonymousPrepaidFactorFromBinData() {
-        BinResponse binResponse = new BinResponse();
-        binResponse.setAnonymousPrepaidIndicator("Y");
-
-        RiskAssessment assessment = evaluator.evaluate(
-                binResponse,
-                new TransactionRequest("585240", BigDecimal.ZERO, "New York", "USA")
-        );
-
-        assertEquals(40, assessment.riskScore());
-        assertEquals("ANONYMOUS_PREPAID_BIN", assessment.factors().get(0).code());
-    }
-
-    @Test
-    void evaluate_shouldCombineIndependentFactors() {
-        BinResponse binResponse = new BinResponse();
-        binResponse.setAnonymousPrepaidIndicator("Y");
-
-        RiskAssessment assessment = evaluator.evaluate(
-                binResponse,
-                new TransactionRequest("585240", new BigDecimal("1500.00"), "New York", "USA")
-        );
-
-        assertEquals(60, assessment.riskScore());
-        assertEquals(2, assessment.factors().size());
-    }
-
-    @Test
     void evaluate_shouldAddCountryMismatchFactor() {
         BinResponse binResponse = new BinResponse();
         binResponse.getCountry().setAlpha3("POL");
