@@ -2,7 +2,11 @@ package com.example.exception;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.smallrye.jwt.build.Jwt;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.util.Set;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -53,15 +57,41 @@ class SecurityErrorResponseTest {
                 .body("message", equalTo("You are not allowed to access this resource"));
     }
 
-    private String createToken(String role) {
-        return given()
-                .queryParam("username", "security-test-user")
-                .queryParam("role", role)
+    @Test
+    void validAdminTokenPassesJwtAndRoleChecksBeforeBinValidation() {
+        given()
+                .header("Authorization", "Bearer " + createToken("admin"))
                 .when()
-                .post("/api/auth/generate")
+                .get("/api/bin/not-a-bin")
                 .then()
-                .statusCode(200)
-                .extract()
-                .path("token");
+                .statusCode(400);
+    }
+
+    @Test
+    void validUserTokenPassesJwtAndRoleChecksBeforeRequestValidation() {
+        given()
+                .header("Authorization", "Bearer " + createToken("user"))
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                          "bin": "585240",
+                          "amount": 100.00,
+                          "location": "New York",
+                          "countryCode": "US"
+                        }
+                        """)
+                .when()
+                .post("/api/transactions/evaluate")
+                .then()
+                .statusCode(400);
+    }
+
+    private String createToken(String role) {
+        return Jwt.issuer("https://localhost")
+                .subject("security-test-user")
+                .groups(Set.of(role))
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300))
+                .sign();
     }
 }
