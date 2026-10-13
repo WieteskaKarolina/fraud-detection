@@ -1,6 +1,9 @@
 package com.example.controller;
 
 import com.example.dto.TransactionRequest;
+import com.example.dto.RiskFactor;
+import com.example.dto.TransactionRiskResponse;
+import com.example.exception.ApiException;
 import com.example.facade.TransactionFacade;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -11,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -29,12 +32,16 @@ class TransactionRiskControllerTest {
     JsonWebToken jwt;
 
     @Test
-    void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {
-        TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA", "USA");
+    void evaluateTransactionRisk_shouldReturnTypedSuccessResponse() {
+        TransactionRequest request = new TransactionRequest("585240", new BigDecimal("50.00"), "LA", "USA");
         when(jwt.getName()).thenReturn("test-user");
-        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
-                Response.status(404).entity(Map.of("error", "BIN details not found")).build()
+        TransactionRiskResponse expected = new TransactionRiskResponse(
+                "generated-request-id",
+                25,
+                "Country mismatch",
+                List.of(new RiskFactor("ISSUER_COUNTRY_MISMATCH", 25, "Country mismatch"))
         );
+        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(expected);
 
         Response response = transactionRiskController.evaluateTransactionRisk(
                 request,
@@ -42,9 +49,8 @@ class TransactionRiskControllerTest {
                 "client-correlation"
         );
 
-        assertEquals(404, response.getStatus());
-        Map<?, ?> responseBody = (Map<?, ?>) response.getEntity();
-        assertEquals("BIN details not found", responseBody.get("error"));
+        assertEquals(200, response.getStatus());
+        assertEquals(expected, response.getEntity());
         verify(transactionFacade).evaluateTransaction(
                 request,
                 "generated-request-id",
@@ -54,22 +60,27 @@ class TransactionRiskControllerTest {
     }
 
     @Test
-    void evaluateTransactionRisk_shouldHandleInternalServerError() {
-        TransactionRequest request = new TransactionRequest("123456", new BigDecimal("100.00"), "NY", "USA");
+    void evaluateTransactionRisk_shouldPropagateApiException() {
+        TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA", "USA");
         when(jwt.getName()).thenReturn("test-user");
-        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
-                Response.status(500).entity(Map.of("error", "Error evaluating transaction risk")).build()
+        ApiException expected = new ApiException(
+                Response.Status.NOT_FOUND,
+                "BIN_NOT_FOUND",
+                "BIN details not found",
+                request.getBin()
+        );
+        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenThrow(expected);
+
+        ApiException actual = org.junit.jupiter.api.Assertions.assertThrows(
+                ApiException.class,
+                () -> transactionRiskController.evaluateTransactionRisk(
+                        request,
+                        "generated-request-id",
+                        "client-correlation"
+                )
         );
 
-        Response response = transactionRiskController.evaluateTransactionRisk(
-                request,
-                "generated-request-id",
-                "client-correlation"
-        );
-
-        assertEquals(500, response.getStatus());
-        Map<?, ?> responseBody = (Map<?, ?>) response.getEntity();
-        assertEquals("Error evaluating transaction risk", responseBody.get("error"));
+        assertEquals(expected, actual);
         verify(transactionFacade).evaluateTransaction(
                 request,
                 "generated-request-id",

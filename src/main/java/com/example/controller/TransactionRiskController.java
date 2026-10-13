@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.TransactionRequest;
+import com.example.dto.TransactionRiskResponse;
 import com.example.facade.TransactionFacade;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -54,7 +55,8 @@ public class TransactionRiskController {
             description = "Evaluates transaction risk. The API generates an X-Request-Id and accepts an optional X-Correlation-Id from the client. Requires authentication."
     )
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Risk evaluation successful"),
+            @APIResponse(responseCode = "200", description = "Risk evaluation successful",
+                    content = @Content(schema = @Schema(implementation = TransactionRiskResponse.class))),
             @APIResponse(responseCode = "400", description = "Invalid request format"),
             @APIResponse(responseCode = "401", description = "Unauthorized request"),
             @APIResponse(responseCode = "403", description = "Forbidden"),
@@ -79,6 +81,12 @@ public class TransactionRiskController {
                     String correlationId
     ) {
         String username = jwt.getName();
-        return transactionFacade.evaluateTransaction(transactionRequest, requestId, correlationId, username);
+        TransactionRiskResponse response = transactionFacade.evaluateTransaction(
+                transactionRequest,
+                requestId,
+                correlationId,
+                username
+        );
+        return Response.ok(response).build();
     }
 }
