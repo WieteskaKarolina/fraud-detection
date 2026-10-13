@@ -16,7 +16,6 @@ public class TransactionRiskEvaluator {
 
     private static final BigDecimal HIGH_AMOUNT_THRESHOLD = BigDecimal.valueOf(1_000);
     private static final int HIGH_AMOUNT_POINTS = 20;
-    private static final int ANONYMOUS_PREPAID_POINTS = 40;
     private static final int ISSUER_COUNTRY_MISMATCH_POINTS = 25;
     private static final int MAX_RISK_SCORE = 100;
 
@@ -29,14 +28,6 @@ public class TransactionRiskEvaluator {
                     "HIGH_AMOUNT",
                     HIGH_AMOUNT_POINTS,
                     "Transaction amount exceeds 1000"
-            ));
-        }
-
-        if (binData != null && "Y".equalsIgnoreCase(binData.getAnonymousPrepaidIndicator())) {
-            factors.add(new RiskFactor(
-                    "ANONYMOUS_PREPAID_BIN",
-                    ANONYMOUS_PREPAID_POINTS,
-                    "BIN is identified as an anonymous prepaid card"
             ));
         }
 
