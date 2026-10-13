@@ -1,6 +1,8 @@
 package com.example.service;
 
+import com.example.dto.RiskAssessment;
 import com.example.dto.BinResponse;
+import com.example.dto.RiskFactor;
 import com.example.dto.TransactionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,7 @@ class TransactionRiskEvaluatorTest {
 
     @Test
     void evaluate_shouldReturnNoFactorsForOrdinaryTransaction() {
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(
+        RiskAssessment assessment = evaluator.evaluate(
                 new BinResponse(),
                 new TransactionRequest("585240", new BigDecimal("100.00"), "New York", "USA")
         );
@@ -33,7 +35,7 @@ class TransactionRiskEvaluatorTest {
 
     @Test
     void evaluate_shouldAddHighAmountFactor() {
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(
+        RiskAssessment assessment = evaluator.evaluate(
                 new BinResponse(),
                 new TransactionRequest("585240", new BigDecimal("1000.01"), "New York", "USA")
         );
@@ -47,7 +49,7 @@ class TransactionRiskEvaluatorTest {
         BinResponse binResponse = new BinResponse();
         binResponse.setAnonymousPrepaidIndicator("Y");
 
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(
+        RiskAssessment assessment = evaluator.evaluate(
                 binResponse,
                 new TransactionRequest("585240", BigDecimal.ZERO, "New York", "USA")
         );
@@ -61,7 +63,7 @@ class TransactionRiskEvaluatorTest {
         BinResponse binResponse = new BinResponse();
         binResponse.setAnonymousPrepaidIndicator("Y");
 
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(
+        RiskAssessment assessment = evaluator.evaluate(
                 binResponse,
                 new TransactionRequest("585240", new BigDecimal("1500.00"), "New York", "USA")
         );
@@ -78,7 +80,7 @@ class TransactionRiskEvaluatorTest {
                 "585240", BigDecimal.ZERO, "New York", "USA"
         );
 
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(binResponse, request);
+        RiskAssessment assessment = evaluator.evaluate(binResponse, request);
 
         assertEquals(25, assessment.riskScore());
         assertEquals("ISSUER_COUNTRY_MISMATCH", assessment.factors().get(0).code());
@@ -92,7 +94,7 @@ class TransactionRiskEvaluatorTest {
                 "585240", BigDecimal.ZERO, "New York", "USA"
         );
 
-        TransactionRiskEvaluator.RiskAssessment assessment = evaluator.evaluate(binResponse, request);
+        RiskAssessment assessment = evaluator.evaluate(binResponse, request);
 
         assertEquals(0, assessment.riskScore());
         assertEquals(List.of(), assessment.factors());

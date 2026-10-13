@@ -1,6 +1,8 @@
 package com.example.facade;
 
 import com.example.dto.BinResponse;
+import com.example.dto.RiskAssessment;
+import com.example.dto.RiskFactor;
 import com.example.dto.TransactionRequest;
 import com.example.exception.ApiException;
 import com.example.model.Transaction;
@@ -56,9 +58,9 @@ class TransactionFacadeTest {
         BinResponse binResponse = new BinResponse();
         when(binLookupService.lookupBin(transactionRequest.getBin())).thenReturn(Optional.of(binResponse));
 
-        TransactionRiskEvaluator.RiskAssessment assessment = new TransactionRiskEvaluator.RiskAssessment(
+        RiskAssessment assessment = new RiskAssessment(
                 50,
-                java.util.List.of(new TransactionRiskEvaluator.RiskFactor("TEST", 50, "Test Risk"))
+                java.util.List.of(new RiskFactor("TEST", 50, "Test Risk"))
         );
         when(transactionRiskEvaluator.evaluate(binResponse, transactionRequest)).thenReturn(assessment);
 

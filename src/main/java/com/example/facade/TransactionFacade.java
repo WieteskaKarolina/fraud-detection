@@ -1,6 +1,7 @@
 package com.example.facade;
 
 import com.example.dto.BinResponse;
+import com.example.dto.RiskAssessment;
 import com.example.dto.TransactionRequest;
 import com.example.exception.ApiException;
 import com.example.model.Transaction;
@@ -45,7 +46,7 @@ public class TransactionFacade {
                 .orElseThrow(() -> new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
                         "BIN details not found", transactionRequest.getBin()));
 
-        TransactionRiskEvaluator.RiskAssessment assessment = transactionRiskEvaluator.evaluate(
+        RiskAssessment assessment = transactionRiskEvaluator.evaluate(
                 binResponse,
                 transactionRequest
         );
