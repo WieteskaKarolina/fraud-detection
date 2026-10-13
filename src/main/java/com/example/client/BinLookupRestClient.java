@@ -13,7 +13,7 @@ import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 
 import java.util.List;
 
-@RegisterRestClient(baseUri = "https://sandbox.api.mastercard.com")
+@RegisterRestClient(configKey = "bin-lookup")
 @RegisterProvider(MastercardAuthFilter.class)
 @Path("/bin-resources/bin-ranges/account-searches")
 public interface BinLookupRestClient {

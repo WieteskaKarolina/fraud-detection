@@ -18,6 +18,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
@@ -50,7 +51,7 @@ public class TransactionRiskController {
     @Path("/evaluate")
     @Operation(
             summary = "Evaluate transaction risk",
-            description = "Evaluates the risk associated with a transaction based on provided details. Requires authentication."
+            description = "Evaluates transaction risk. The API generates an X-Request-Id and accepts an optional X-Correlation-Id from the client. Requires authentication."
     )
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Risk evaluation successful"),
@@ -72,13 +73,12 @@ public class TransactionRiskController {
                     content = @Content(schema = @Schema(implementation = TransactionRequest.class))
             ) TransactionRequest transactionRequest,
 
-            @HeaderParam("X-Request-Id")
-            @Schema(
-                    description = "Unique request identifier for tracing",
-                    example = "123e4567-e89b-12d3-a456-426614174000"
-            ) String requestId
+            @HeaderParam("X-Request-Id") @Parameter(hidden = true) String requestId,
+            @HeaderParam("X-Correlation-Id")
+            @Parameter(description = "Optional client identifier for correlating this request with client logs")
+                    String correlationId
     ) {
         String username = jwt.getName();
-        return transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
+        return transactionFacade.evaluateTransaction(transactionRequest, requestId, correlationId, username);
     }
 }

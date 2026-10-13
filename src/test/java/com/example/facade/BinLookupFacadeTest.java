@@ -32,7 +32,7 @@ class BinLookupFacadeTest {
         BinResponse mockBinResponse = new BinResponse();
         when(binLookupService.lookupBin(validBin)).thenReturn(Optional.of(mockBinResponse));
 
-        Response response = binLookupFacade.getBinDetails(validBin);
+        Response response = binLookupFacade.getBinDetails(validBin, "test-request-id", "client-correlation");
 
         assertEquals(200, response.getStatus());
         assertNotNull(response.getEntity());
@@ -46,7 +46,7 @@ class BinLookupFacadeTest {
         when(binLookupService.lookupBin(invalidBin)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
-                () -> binLookupFacade.getBinDetails(invalidBin));
+                () -> binLookupFacade.getBinDetails(invalidBin, "test-request-id", "client-correlation"));
 
         assertEquals(404, exception.getStatus().getStatusCode());
         assertEquals("BIN_NOT_FOUND", exception.getCode());
@@ -60,7 +60,7 @@ class BinLookupFacadeTest {
         when(binLookupService.lookupBin(validBin)).thenThrow(new RuntimeException("Unexpected error"));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> binLookupFacade.getBinDetails(validBin));
+                () -> binLookupFacade.getBinDetails(validBin, "test-request-id", "client-correlation"));
         assertEquals("Unexpected error", exception.getMessage());
 
         verify(binLookupService).lookupBin(validBin);
