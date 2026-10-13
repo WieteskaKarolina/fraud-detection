@@ -30,7 +30,7 @@ class TransactionRiskControllerTest {
 
     @Test
     void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {
-        TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA");
+        TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA", "USA");
         when(jwt.getName()).thenReturn("test-user");
         when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
                 Response.status(404).entity(Map.of("error", "BIN details not found")).build()
@@ -55,7 +55,7 @@ class TransactionRiskControllerTest {
 
     @Test
     void evaluateTransactionRisk_shouldHandleInternalServerError() {
-        TransactionRequest request = new TransactionRequest("123456", new BigDecimal("100.00"), "NY");
+        TransactionRequest request = new TransactionRequest("123456", new BigDecimal("100.00"), "NY", "USA");
         when(jwt.getName()).thenReturn("test-user");
         when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
                 Response.status(500).entity(Map.of("error", "Error evaluating transaction risk")).build()

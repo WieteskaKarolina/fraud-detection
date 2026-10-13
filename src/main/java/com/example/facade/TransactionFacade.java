@@ -5,7 +5,7 @@ import com.example.dto.TransactionRequest;
 import com.example.exception.ApiException;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
-import com.example.service.FraudDetectionService;
+import com.example.service.TransactionRiskEvaluator;
 import com.example.service.TransactionService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,16 +19,16 @@ public class TransactionFacade {
 
     private static final Logger LOGGER = Logger.getLogger(TransactionFacade.class);
 
-    private final FraudDetectionService fraudDetectionService;
+    private final TransactionRiskEvaluator transactionRiskEvaluator;
     private final BinLookupService binLookupService;
     private final TransactionService transactionService;
 
     @Inject
     public TransactionFacade(
-            FraudDetectionService fraudDetectionService,
+            TransactionRiskEvaluator transactionRiskEvaluator,
             BinLookupService binLookupService,
             TransactionService transactionService) {
-        this.fraudDetectionService = fraudDetectionService;
+        this.transactionRiskEvaluator = transactionRiskEvaluator;
         this.binLookupService = binLookupService;
         this.transactionService = transactionService;
     }
@@ -45,7 +45,7 @@ public class TransactionFacade {
                 .orElseThrow(() -> new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
                         "BIN details not found", transactionRequest.getBin()));
 
-        FraudDetectionService.RiskEvaluation evaluation = fraudDetectionService.evaluateRisk(
+        TransactionRiskEvaluator.RiskAssessment assessment = transactionRiskEvaluator.evaluate(
                 binResponse,
                 transactionRequest
         );
@@ -55,14 +55,22 @@ public class TransactionFacade {
                 transactionRequest.getBin(),
                 transactionRequest.getAmount(),
                 transactionRequest.getLocation(),
-                evaluation.getRiskScore(),
-                evaluation.getDescription()
+                transactionRequest.getCountryCode(),
+                assessment.riskScore(),
+                assessment.explanation()
         );
 
         return Response.ok(Map.of(
                 "requestId", requestId,
                 "riskScore", transaction.getRiskScore(),
-                "explanation", transaction.getRiskReason()
+                "explanation", transaction.getRiskReason(),
+                "riskFactors", assessment.factors().stream()
+                        .map(factor -> Map.of(
+                                "code", factor.code(),
+                                "points", factor.points(),
+                                "description", factor.description()
+                        ))
+                        .toList()
         )).build();
     }
 }

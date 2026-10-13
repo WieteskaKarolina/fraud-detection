@@ -1,6 +1,7 @@
 package com.example.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
@@ -35,4 +36,9 @@ public class TransactionRequest {
     @Schema(description = "Location where the transaction is being processed",
             example = "New York, USA")
     private String location;
+
+    @NotBlank
+    @Pattern(regexp = "[A-Za-z]{3}", message = "Country code must be an ISO 3166-1 alpha-3 code")
+    @Schema(description = "ISO 3166-1 alpha-3 country code for the transaction location", example = "USA")
+    private String countryCode;
 }

@@ -31,6 +31,7 @@ class TransactionServiceTest {
         String bin = "123456";
         BigDecimal amount = new BigDecimal("100.50");
         String location = "New York";
+        String countryCode = "USA";
         int riskScore = 75;
         String riskReason = "Suspicious activity";
 
@@ -39,6 +40,7 @@ class TransactionServiceTest {
                 bin,
                 amount,
                 location,
+                countryCode,
                 riskScore,
                 riskReason
         );
@@ -57,6 +59,7 @@ class TransactionServiceTest {
                 () -> assertEquals(bin, persisted.getBin()),
                 () -> assertEquals(0, amount.compareTo(persisted.getAmount())),
                 () -> assertEquals(location, persisted.getLocation()),
+                () -> assertEquals(countryCode, persisted.getCountryCode()),
                 () -> assertEquals(riskScore, persisted.getRiskScore()),
                 () -> assertEquals(riskReason, persisted.getRiskReason()),
                 () -> assertNotNull(persisted.getTimestamp())

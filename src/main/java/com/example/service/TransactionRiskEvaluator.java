@@ -7,145 +7,75 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 
 @ApplicationScoped
-public class FraudDetectionService {
-    private static final Set<Integer> HIGH_RISK_COUNTRIES = Set.of(643, 566, 862);
+public class TransactionRiskEvaluator {
 
-    private final List<Rule<BinResponse>> binResponseRules = new ArrayList<>();
-    private final List<Rule<TransactionRequest>> transactionRequestRules = new ArrayList<>();
+    private static final BigDecimal HIGH_AMOUNT_THRESHOLD = BigDecimal.valueOf(1_000);
+    private static final int HIGH_AMOUNT_POINTS = 20;
+    private static final int ANONYMOUS_PREPAID_POINTS = 40;
+    private static final int ISSUER_COUNTRY_MISMATCH_POINTS = 25;
+    private static final int MAX_RISK_SCORE = 100;
 
-    public FraudDetectionService() {
-        binResponseRules.add(this::evaluateHighRiskCountry);
-        binResponseRules.add(this::evaluateAnonymousPrepaidCard);
-        binResponseRules.add(this::evaluateCorporateCardMisuse);
-        binResponseRules.add(this::evaluateNonReloadableCard);
-        binResponseRules.add(this::evaluateAuthorizationOnlyCard);
-        binResponseRules.add(this::evaluateLocalUseMismatch);
-        binResponseRules.add(this::evaluateGamblingBlock);
-        binResponseRules.add(this::evaluateNoFundingSource);
+    public RiskAssessment evaluate(BinResponse binData, TransactionRequest transactionRequest) {
+        List<RiskFactor> factors = new ArrayList<>();
 
-        transactionRequestRules.add(this::evaluateHighTransactionAmount);
-        transactionRequestRules.add(this::evaluateHighRiskLocation);
+        if (transactionRequest.getAmount() != null
+                && transactionRequest.getAmount().compareTo(HIGH_AMOUNT_THRESHOLD) > 0) {
+            factors.add(new RiskFactor(
+                    "HIGH_AMOUNT",
+                    HIGH_AMOUNT_POINTS,
+                    "Transaction amount exceeds 1000"
+            ));
+        }
+
+        if (binData != null && "Y".equalsIgnoreCase(binData.getAnonymousPrepaidIndicator())) {
+            factors.add(new RiskFactor(
+                    "ANONYMOUS_PREPAID_BIN",
+                    ANONYMOUS_PREPAID_POINTS,
+                    "BIN is identified as an anonymous prepaid card"
+            ));
+        }
+
+        if (hasIssuerCountryMismatch(binData, transactionRequest)) {
+            factors.add(new RiskFactor(
+                    "ISSUER_COUNTRY_MISMATCH",
+                    ISSUER_COUNTRY_MISMATCH_POINTS,
+                    "Transaction country differs from the card issuer country"
+            ));
+        }
+
+        int score = factors.stream().mapToInt(RiskFactor::points).sum();
+        return new RiskAssessment(Math.min(score, MAX_RISK_SCORE), factors);
     }
 
-    public RiskEvaluation evaluateRisk(BinResponse binData, TransactionRequest transactionRequest) {
-        int totalRiskScore = 0;
-        StringBuilder riskDescription = new StringBuilder("Risk factors:\n");
+    private boolean hasIssuerCountryMismatch(BinResponse binData, TransactionRequest transactionRequest) {
+        if (binData == null || binData.getCountry() == null
+                || transactionRequest.getCountryCode() == null
+                || binData.getCountry().getAlpha3() == null
+                || binData.getCountry().getAlpha3().isBlank()) {
+            return false;
+        }
 
-        for (Rule<BinResponse> rule : binResponseRules) {
-            RiskEvaluation evaluation = rule.evaluate(binData);
-            totalRiskScore += evaluation.getRiskScore();
-            if (evaluation.getRiskScore() > 0) {
-                riskDescription.append(evaluation.getDescription()).append("\n");
+        String issuerCountry = binData.getCountry().getAlpha3().trim();
+        String transactionCountry = transactionRequest.getCountryCode().trim().toUpperCase(Locale.ROOT);
+        return !issuerCountry.equalsIgnoreCase(transactionCountry);
+    }
+
+    public record RiskFactor(String code, int points, String description) {
+    }
+
+    public record RiskAssessment(int riskScore, List<RiskFactor> factors) {
+        public RiskAssessment {
+            factors = List.copyOf(factors);
+        }
+
+        public String explanation() {
+            if (factors.isEmpty()) {
+                return "No risk factors identified";
             }
-        }
-
-        for (Rule<TransactionRequest> rule : transactionRequestRules) {
-            RiskEvaluation evaluation = rule.evaluate(transactionRequest);
-            totalRiskScore += evaluation.getRiskScore();
-            if (evaluation.getRiskScore() > 0) {
-                riskDescription.append(evaluation.getDescription()).append("\n");
-            }
-        }
-
-        totalRiskScore = Math.min(totalRiskScore, 100);
-
-        return new RiskEvaluation(totalRiskScore, riskDescription.toString());
-    }
-
-    private RiskEvaluation evaluateHighRiskCountry(BinResponse binData) {
-        if (HIGH_RISK_COUNTRIES.contains(binData.getCountry().getCode())) {
-            return new RiskEvaluation(50, "High-risk country (Russia, Nigeria, Venezuela)");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateAnonymousPrepaidCard(BinResponse binData) {
-        if ("Y".equalsIgnoreCase(binData.getAnonymousPrepaidIndicator())) {
-            return new RiskEvaluation(40, "Anonymous prepaid card detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateCorporateCardMisuse(BinResponse binData) {
-        if ("CORPORATE".equalsIgnoreCase(binData.getConsumerType())) {
-            return new RiskEvaluation(30, "Corporate card misuse detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateNonReloadableCard(BinResponse binData) {
-        if (binData.isNonReloadableIndicator()) {
-            return new RiskEvaluation(20, "Non-reloadable card detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateAuthorizationOnlyCard(BinResponse binData) {
-        if (binData.isAuthorizationOnly()) {
-            return new RiskEvaluation(50, "Authorization-only card detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateLocalUseMismatch(BinResponse binData) {
-        if (binData.isLocalUse()) {
-            return new RiskEvaluation(25, "Local use mismatch detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateGamblingBlock(BinResponse binData) {
-        if (Boolean.TRUE.equals(binData.getGamblingBlockEnabled())) {
-            return new RiskEvaluation(60, "Gambling block enabled");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateNoFundingSource(BinResponse binData) {
-        if ("NONE".equalsIgnoreCase(binData.getFundingSource())) {
-            return new RiskEvaluation(30, "No funding source detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateHighTransactionAmount(TransactionRequest transactionRequest) {
-        if (transactionRequest.getAmount().compareTo(BigDecimal.valueOf(1000)) > 0) {
-            return new RiskEvaluation(20, "High transaction amount detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    private RiskEvaluation evaluateHighRiskLocation(TransactionRequest transactionRequest) {
-        if ("HighRiskCity".equalsIgnoreCase(transactionRequest.getLocation())) {
-            return new RiskEvaluation(30, "High-risk location detected");
-        }
-        return RiskEvaluation.NO_RISK;
-    }
-
-    public interface Rule<T> {
-        RiskEvaluation evaluate(T data);
-    }
-
-    public static class RiskEvaluation {
-        public static final RiskEvaluation NO_RISK = new RiskEvaluation(0, "");
-
-        private final int riskScore;
-        private final String description;
-
-        public RiskEvaluation(int riskScore, String description) {
-            this.riskScore = riskScore;
-            this.description = description;
-        }
-
-        public int getRiskScore() {
-            return riskScore;
-        }
-
-        public String getDescription() {
-            return description;
+            return String.join("; ", factors.stream().map(RiskFactor::description).toList());
         }
     }
 }
