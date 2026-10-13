@@ -25,26 +25,28 @@ class BinLookupControllerTest {
 
     @Test
     void getBinDetails_shouldReturnBinDetails_whenBinExists() {
-        when(binLookupFacade.getBinDetails("123456")).thenReturn(
+        when(binLookupFacade.getBinDetails("123456", "test-request-id", "client-correlation")).thenReturn(
                 Response.ok(Map.of("bin", "123456", "status", "valid")).build()
         );
 
-        Response response = binLookupController.getBinDetails("123456");
+        Response response = binLookupController.getBinDetails("123456", "test-request-id", "client-correlation");
 
         assertEquals(200, response.getStatus());
         assertNotNull(response.getEntity());
+        verify(binLookupFacade).getBinDetails("123456", "test-request-id", "client-correlation");
     }
 
     @Test
     void getBinDetails_shouldReturnNotFound_whenBinNotExists() {
-        when(binLookupFacade.getBinDetails("999999")).thenReturn(
+        when(binLookupFacade.getBinDetails("999999", "test-request-id", "client-correlation")).thenReturn(
                 Response.status(404).entity(Map.of("error", "BIN details not found")).build()
         );
 
-        Response response = binLookupController.getBinDetails("999999");
+        Response response = binLookupController.getBinDetails("999999", "test-request-id", "client-correlation");
 
         assertEquals(404, response.getStatus());
         Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
         assertEquals("BIN details not found", responseBody.get("error"));
+        verify(binLookupFacade).getBinDetails("999999", "test-request-id", "client-correlation");
     }
 }

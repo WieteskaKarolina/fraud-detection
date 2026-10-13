@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.util.Map;
-import java.util.UUID;
 
 @ApplicationScoped
 public class TransactionFacade {
@@ -34,9 +33,13 @@ public class TransactionFacade {
         this.transactionService = transactionService;
     }
 
-    public Response evaluateTransaction(TransactionRequest transactionRequest, String requestId, String username) {
-        String traceId = (requestId != null) ? requestId : UUID.randomUUID().toString();
-        LOGGER.info("User " + username + " evaluating transaction risk with X-Request-Id: " + traceId);
+    public Response evaluateTransaction(
+            TransactionRequest transactionRequest,
+            String requestId,
+            String correlationId,
+            String username
+    ) {
+        LOGGER.infof("User %s evaluating transaction risk", username);
 
         BinResponse binResponse = binLookupService.lookupBin(transactionRequest.getBin())
                 .orElseThrow(() -> new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND",
@@ -48,7 +51,7 @@ public class TransactionFacade {
         );
 
         Transaction transaction = transactionService.saveTransaction(
-                traceId,
+                requestId,
                 transactionRequest.getBin(),
                 transactionRequest.getAmount(),
                 transactionRequest.getLocation(),
@@ -57,9 +60,9 @@ public class TransactionFacade {
         );
 
         return Response.ok(Map.of(
-                "requestId", traceId,
+                "requestId", requestId,
                 "riskScore", transaction.getRiskScore(),
                 "explanation", transaction.getRiskReason()
-        )).header("X-Request-Id", traceId).build();
+        )).build();
     }
 }

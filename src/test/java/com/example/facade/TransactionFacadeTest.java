@@ -40,12 +40,14 @@ class TransactionFacadeTest {
 
     private TransactionRequest transactionRequest;
     private String requestId;
+    private String correlationId;
     private String username;
 
     @BeforeEach
     void setUp() {
         transactionRequest = new TransactionRequest("585240", new BigDecimal("100.00"), "New York");
         requestId = UUID.randomUUID().toString();
+        correlationId = "client-correlation-123";
         username = "testUser";
     }
 
@@ -63,16 +65,29 @@ class TransactionFacadeTest {
         when(transactionService.saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any()))
                 .thenReturn(mockTransaction);
 
-        Response response = transactionFacade.evaluateTransaction(transactionRequest, requestId, username);
+        Response response = transactionFacade.evaluateTransaction(
+                transactionRequest,
+                requestId,
+                correlationId,
+                username
+        );
 
         assertEquals(200, response.getStatus());
         Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
+        assertEquals(requestId, responseBody.get("requestId"));
         assertEquals(50, responseBody.get("riskScore"));
         assertEquals("Test Risk", responseBody.get("explanation"));
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verify(fraudDetectionService).evaluateRisk(binResponse, transactionRequest);
-        verify(transactionService).saveTransaction(any(), any(), any(BigDecimal.class), any(), anyInt(), any());
+        verify(transactionService).saveTransaction(
+                requestId,
+                transactionRequest.getBin(),
+                transactionRequest.getAmount(),
+                transactionRequest.getLocation(),
+                50,
+                "Test Risk"
+        );
     }
 
     @Test
@@ -80,7 +95,12 @@ class TransactionFacadeTest {
         when(binLookupService.lookupBin(transactionRequest.getBin())).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
-                () -> transactionFacade.evaluateTransaction(transactionRequest, requestId, username));
+                () -> transactionFacade.evaluateTransaction(
+                        transactionRequest,
+                        requestId,
+                        correlationId,
+                        username
+                ));
 
         assertEquals(404, exception.getStatus().getStatusCode());
         assertEquals("BIN_NOT_FOUND", exception.getCode());
@@ -95,7 +115,12 @@ class TransactionFacadeTest {
         when(binLookupService.lookupBin(transactionRequest.getBin())).thenThrow(new RuntimeException("Unexpected error"));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> transactionFacade.evaluateTransaction(transactionRequest, requestId, username));
+                () -> transactionFacade.evaluateTransaction(
+                        transactionRequest,
+                        requestId,
+                        correlationId,
+                        username
+                ));
         assertEquals("Unexpected error", exception.getMessage());
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());

@@ -32,31 +32,49 @@ class TransactionRiskControllerTest {
     void evaluateTransactionRisk_shouldReturnNotFound_whenBinNotFound() {
         TransactionRequest request = new TransactionRequest("000000", new BigDecimal("50.00"), "LA");
         when(jwt.getName()).thenReturn("test-user");
-        when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
+        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
                 Response.status(404).entity(Map.of("error", "BIN details not found")).build()
         );
 
-        Response response = transactionRiskController.evaluateTransactionRisk(request, null);
+        Response response = transactionRiskController.evaluateTransactionRisk(
+                request,
+                "generated-request-id",
+                "client-correlation"
+        );
 
         assertEquals(404, response.getStatus());
         Map<?, ?> responseBody = (Map<?, ?>) response.getEntity();
         assertEquals("BIN details not found", responseBody.get("error"));
-        verify(transactionFacade).evaluateTransaction(request, null, "test-user");
+        verify(transactionFacade).evaluateTransaction(
+                request,
+                "generated-request-id",
+                "client-correlation",
+                "test-user"
+        );
     }
 
     @Test
     void evaluateTransactionRisk_shouldHandleInternalServerError() {
         TransactionRequest request = new TransactionRequest("123456", new BigDecimal("100.00"), "NY");
         when(jwt.getName()).thenReturn("test-user");
-        when(transactionFacade.evaluateTransaction(any(), any(), any())).thenReturn(
+        when(transactionFacade.evaluateTransaction(any(), any(), any(), any())).thenReturn(
                 Response.status(500).entity(Map.of("error", "Error evaluating transaction risk")).build()
         );
 
-        Response response = transactionRiskController.evaluateTransactionRisk(request, null);
+        Response response = transactionRiskController.evaluateTransactionRisk(
+                request,
+                "generated-request-id",
+                "client-correlation"
+        );
 
         assertEquals(500, response.getStatus());
         Map<?, ?> responseBody = (Map<?, ?>) response.getEntity();
         assertEquals("Error evaluating transaction risk", responseBody.get("error"));
-        verify(transactionFacade).evaluateTransaction(request, null, "test-user");
+        verify(transactionFacade).evaluateTransaction(
+                request,
+                "generated-request-id",
+                "client-correlation",
+                "test-user"
+        );
     }
 }
