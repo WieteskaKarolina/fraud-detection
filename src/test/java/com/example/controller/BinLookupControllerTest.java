@@ -27,7 +27,6 @@ class BinLookupControllerTest {
 
     @Test
     void getBinDetails_shouldReturnBinDetails_whenBinExists() {
-        // Mockujemy zwrócenie obiektu BinResponse zamiast Response
         when(binLookupFacade.getBinDetails("123456", "test-request-id", "client-correlation"))
                 .thenReturn(binResponse);
 
@@ -40,11 +39,9 @@ class BinLookupControllerTest {
 
     @Test
     void getBinDetails_shouldThrowApiException_whenBinNotExists() {
-        // Fasada rzuca teraz ApiException, gdy BIN nie zostanie znaleziony
         when(binLookupFacade.getBinDetails("999999", "test-request-id", "client-correlation"))
                 .thenThrow(new ApiException(Response.Status.NOT_FOUND, "BIN_NOT_FOUND", "BIN details not found", "999999"));
 
-        // Oczekujemy wyjątku ApiException w teście jednostkowym kontrolera
         ApiException exception = assertThrows(
                 ApiException.class,
                 () -> binLookupController.getBinDetails("999999", "test-request-id", "client-correlation")

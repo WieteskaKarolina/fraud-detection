@@ -70,7 +70,8 @@ public class MastercardAuthFilter implements ClientRequestFilter {
             try {
                 return objectMapper.writeValueAsString(requestContext.getEntity());
             } catch (Exception e) {
-                LOGGER.error("JSON serialization error", e);
+                LOGGER.error("JSON serialization error for OAuth signature", e);
+                throw new RuntimeException("Failed to serialize request body for OAuth signing", e);
             }
         }
         return "";
