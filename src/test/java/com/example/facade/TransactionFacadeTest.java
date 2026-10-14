@@ -4,12 +4,12 @@ import com.example.dto.BinResponse;
 import com.example.dto.RiskAssessment;
 import com.example.dto.RiskFactor;
 import com.example.dto.TransactionRequest;
+import com.example.dto.TransactionRiskResponse;
 import com.example.exception.ApiException;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
 import com.example.service.TransactionRiskEvaluator;
 import com.example.service.TransactionService;
-import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,18 +69,17 @@ class TransactionFacadeTest {
         when(transactionService.saveTransaction(any(), any(), any(BigDecimal.class), any(), any(), anyInt(), any()))
                 .thenReturn(mockTransaction);
 
-        Response response = transactionFacade.evaluateTransaction(
+        TransactionRiskResponse response = transactionFacade.evaluateTransaction(
                 transactionRequest,
                 requestId,
                 correlationId,
                 username
         );
 
-        assertEquals(200, response.getStatus());
-        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity();
-        assertEquals(requestId, responseBody.get("requestId"));
-        assertEquals(50, responseBody.get("riskScore"));
-        assertEquals("Test Risk", responseBody.get("explanation"));
+        assertEquals(requestId, response.requestId());
+        assertEquals(50, response.riskScore());
+        assertEquals("Test Risk", response.explanation());
+        assertEquals(assessment.factors(), response.riskFactors());
 
         verify(binLookupService).lookupBin(transactionRequest.getBin());
         verify(transactionRiskEvaluator).evaluate(binResponse, transactionRequest);

@@ -61,6 +61,7 @@ public class BinLookupController {
             @Parameter(description = "Optional client identifier for correlating this request with client logs")
                     String correlationId
     ) {
-        return binLookupFacade.getBinDetails(binNumber, requestId, correlationId);
+        BinResponse binResponse = binLookupFacade.getBinDetails(binNumber, requestId, correlationId);
+        return Response.ok(binResponse).build();
     }
 }

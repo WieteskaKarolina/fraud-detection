@@ -125,6 +125,10 @@ paths:
       responses:
         "200":
           description: Risk evaluation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRiskResponse'
           headers:
             X-Request-Id:
               description: Server-generated identifier for tracing this request
@@ -278,6 +282,43 @@ components:
           pattern: '[A-Za-z]{3}'
           type: string
           example: USA
+    TransactionRiskResponse:
+      type: object
+      required:
+      - requestId
+      - riskScore
+      - explanation
+      - riskFactors
+      properties:
+        requestId:
+          description: Server-generated identifier for tracing the request
+          type: string
+          format: uuid
+        riskScore:
+          description: Calculated transaction risk score from 0 to 100
+          type: integer
+          minimum: 0
+          maximum: 100
+        explanation:
+          description: Summary of the risk assessment
+          type: string
+        riskFactors:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskFactor'
+    RiskFactor:
+      type: object
+      required:
+      - code
+      - points
+      - description
+      properties:
+        code:
+          type: string
+        points:
+          type: integer
+        description:
+          type: string
   securitySchemes:
     SecurityScheme:
       type: http
