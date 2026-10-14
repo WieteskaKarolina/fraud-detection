@@ -32,11 +32,10 @@ class BinLookupFacadeTest {
         BinResponse mockBinResponse = new BinResponse();
         when(binLookupService.lookupBin(validBin)).thenReturn(Optional.of(mockBinResponse));
 
-        Response response = binLookupFacade.getBinDetails(validBin, "test-request-id", "client-correlation");
+        BinResponse binResponse = binLookupFacade.getBinDetails(validBin, "test-request-id", "client-correlation");
 
-        assertEquals(200, response.getStatus());
-        assertNotNull(response.getEntity());
-        assertTrue(response.getEntity() instanceof BinResponse);
+        assertNotNull(binResponse);
+        assertEquals(mockBinResponse, binResponse);
 
         verify(binLookupService).lookupBin(validBin);
     }

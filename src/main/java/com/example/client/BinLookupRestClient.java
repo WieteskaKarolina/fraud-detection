@@ -3,6 +3,7 @@ package com.example.client;
 import com.example.auth.MastercardAuthFilter;
 import com.example.dto.BinRequest;
 import com.example.dto.BinResponse;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RegisterRestClient(configKey = "bin-lookup")
 @RegisterProvider(MastercardAuthFilter.class)
+@ApplicationScoped
 @Path("/bin-resources/bin-ranges/account-searches")
 public interface BinLookupRestClient {
 

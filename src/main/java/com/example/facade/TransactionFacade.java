@@ -3,6 +3,7 @@ package com.example.facade;
 import com.example.dto.BinResponse;
 import com.example.dto.RiskAssessment;
 import com.example.dto.TransactionRequest;
+import com.example.dto.TransactionRiskResponse;
 import com.example.exception.ApiException;
 import com.example.model.Transaction;
 import com.example.service.BinLookupService;
@@ -13,7 +14,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
-import java.util.Map;
 
 @ApplicationScoped
 public class TransactionFacade {
@@ -34,7 +34,7 @@ public class TransactionFacade {
         this.transactionService = transactionService;
     }
 
-    public Response evaluateTransaction(
+    public TransactionRiskResponse evaluateTransaction(
             TransactionRequest transactionRequest,
             String requestId,
             String correlationId,
@@ -61,17 +61,11 @@ public class TransactionFacade {
                 assessment.explanation()
         );
 
-        return Response.ok(Map.of(
-                "requestId", requestId,
-                "riskScore", transaction.getRiskScore(),
-                "explanation", transaction.getRiskReason(),
-                "riskFactors", assessment.factors().stream()
-                        .map(factor -> Map.of(
-                                "code", factor.code(),
-                                "points", factor.points(),
-                                "description", factor.description()
-                        ))
-                        .toList()
-        )).build();
+        return new TransactionRiskResponse(
+                requestId,
+                transaction.getRiskScore(),
+                transaction.getRiskReason(),
+                assessment.factors()
+        );
     }
 }
